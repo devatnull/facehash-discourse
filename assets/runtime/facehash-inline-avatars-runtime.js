@@ -25,6 +25,7 @@
   var INTERACTIVE_PERSPECTIVE = 520;
   var INTERACTIVE_TRANSLATE_Z = 6;
   var INTERACTIVE_TRANSLATE_Z_SMALL = 0;
+  var INTERACTIVE_TRANSLATE_2D_SMALL = 0.8;
   var SMALL_AVATAR_THRESHOLD = 28;
 
   function readSiteSettings() {
@@ -231,11 +232,21 @@
     var isSmallAvatar = maxDim > 0 && maxDim <= SMALL_AVATAR_THRESHOLD;
     var rotateRange = isSmallAvatar ? INTERACTIVE_ROTATE_RANGE_SMALL : INTERACTIVE_ROTATE_RANGE;
     var translateZ = isSmallAvatar ? INTERACTIVE_TRANSLATE_Z_SMALL : INTERACTIVE_TRANSLATE_Z;
+    var translate2d = isSmallAvatar ? INTERACTIVE_TRANSLATE_2D_SMALL : 0;
 
     target.style.setProperty("--fh-rx", position.x * rotateRange + "deg");
     target.style.setProperty("--fh-ry", position.y * rotateRange + "deg");
     target.style.setProperty("--fh-tz", translateZ + "px");
-    wrapper.style.perspective = isSmallAvatar ? "none" : INTERACTIVE_PERSPECTIVE + "px";
+    target.style.setProperty("--fh-tx", position.y * translate2d + "px");
+    target.style.setProperty("--fh-ty", -position.x * translate2d + "px");
+
+    if (isSmallAvatar) {
+      wrapper.classList.add("facehash-inline-small");
+      wrapper.style.perspective = "none";
+    } else {
+      wrapper.classList.remove("facehash-inline-small");
+      wrapper.style.perspective = INTERACTIVE_PERSPECTIVE + "px";
+    }
   }
 
   function parseSvg(text) {

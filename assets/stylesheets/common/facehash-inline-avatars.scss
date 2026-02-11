@@ -33,9 +33,21 @@
     translateZ(var(--fh-tz, 0px));
 }
 
+.facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face {
+  transform:
+    translateX(var(--fh-tx, 0px))
+    translateY(var(--fh-ty, 0px));
+}
+
 .facehash-inline-avatar.facehash-inline-hover:hover .facehash-inline-interactive-face {
   transform:
     rotateX(0deg)
     rotateY(0deg)
     translateZ(var(--fh-tz, 0px));
+}
+
+.facehash-inline-avatar.facehash-inline-hover.facehash-inline-small:hover .facehash-inline-interactive-face {
+  transform:
+    translateX(0px)
+    translateY(0px);
 }

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.12] - 2026-02-11
+
+### Fixed
+
+- Switched tiny inline avatars (<= 28px) from 3D transform interaction to 2D micro-shift interaction.
+- This removes remaining square-plane artifacts seen in preview/poster contexts across browsers (including Chrome/Safari).
+
 ## [0.5.11] - 2026-02-11
 
 ### Fixed
