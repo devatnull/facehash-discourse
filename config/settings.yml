@@ -22,9 +22,6 @@ plugins:
   facehash_avatars_shape:
     default: "round"
     client: false
-  facehash_avatars_intensity_3d:
-    default: "dramatic"
-    client: false
   facehash_avatars_font_family:
     default: "monospace"
     client: false

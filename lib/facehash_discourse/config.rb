@@ -8,7 +8,6 @@ module ::FacehashDiscourse
     COLOR_REGEX = /\A#[0-9A-Fa-f]{3,8}\z/
     ALLOWED_HASH_SOURCES = %w[username name name_or_username].freeze
     ALLOWED_SHAPES = %w[square squircle round].freeze
-    ALLOWED_INTENSITY_3D = %w[none subtle medium dramatic].freeze
     ALLOWED_FONT_WEIGHTS = %w[normal bold bolder lighter].freeze
     FONT_WEIGHT_REGEX = /\A[1-9]00\z/
     FONT_FAMILY_REGEX = /\A[\w\s,'"-]+\z/
@@ -30,7 +29,6 @@ module ::FacehashDiscourse
         blink_duration_ms,
         hash_source,
         shape,
-        intensity_3d,
         font_family,
         font_weight,
         auto_foreground_contrast?,
@@ -77,8 +75,7 @@ module ::FacehashDiscourse
     end
 
     def intensity_3d
-      candidate = SiteSetting.facehash_avatars_intensity_3d.to_s.strip
-      ALLOWED_INTENSITY_3D.include?(candidate) ? candidate.to_sym : :dramatic
+      :dramatic
     end
 
     def blink_interval_seconds

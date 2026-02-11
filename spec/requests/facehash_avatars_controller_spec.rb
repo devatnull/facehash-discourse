@@ -18,7 +18,6 @@ describe FacehashDiscourse::AvatarsController do
     SiteSetting.facehash_avatars_blink_interval_seconds = 6
     SiteSetting.facehash_avatars_blink_duration_ms = 180
     SiteSetting.facehash_avatars_shape = "round"
-    SiteSetting.facehash_avatars_intensity_3d = "dramatic"
     SiteSetting.facehash_avatars_font_family = "monospace"
     SiteSetting.facehash_avatars_font_weight = "700"
     SiteSetting.facehash_avatars_auto_foreground_contrast = true

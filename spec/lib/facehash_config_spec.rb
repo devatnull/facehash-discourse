@@ -39,15 +39,7 @@ describe FacehashDiscourse::Config do
     expect(described_class.shape).to eq(:round)
   end
 
-  it "supports a valid 3d intensity setting" do
-    SiteSetting.facehash_avatars_intensity_3d = "subtle"
-
-    expect(described_class.intensity_3d).to eq(:subtle)
-  end
-
-  it "falls back to dramatic 3d intensity when invalid" do
-    SiteSetting.facehash_avatars_intensity_3d = "bad-intensity"
-
+  it "uses a fixed dramatic 3d intensity" do
     expect(described_class.intensity_3d).to eq(:dramatic)
   end
 
