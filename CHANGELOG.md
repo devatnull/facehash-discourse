@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.14] - 2026-02-11
+
+### Fixed
+
+- Removed Discourse topic-list/poster border/box-shadow/outline ring styles from Facehash inline wrappers.
+- Prevents visible frame artifacts in preview/poster cells while preserving avatar rendering behavior.
+
 ## [0.5.13] - 2026-02-11
 
 ### Fixed
