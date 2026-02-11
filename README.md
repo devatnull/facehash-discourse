@@ -4,6 +4,12 @@ Deterministic Facehash avatars for Discourse default avatar slots.
 
 This plugin replaces Discourse default avatars for users without an uploaded profile picture. Users with uploaded avatars are unchanged.
 
+## Official Links
+
+- Repository: https://github.com/devatnull/facehash-discourse
+- Meta topic: TODO (add after publishing on Meta)
+- Changelog: `CHANGELOG.md`
+
 ## Installation
 
 Follow the official Discourse plugin installation guide:
@@ -137,7 +143,7 @@ bundle exec rspec plugins/discourse-facehash-avatars/spec
 Use this template to publish your official Meta topic:
 - `docs/META_TOPIC_TEMPLATE.md`
 
-After posting, add the Meta topic link here.
+After posting, replace `TODO` in the **Official Links** section above with the live Meta URL.
 
 ## License
 

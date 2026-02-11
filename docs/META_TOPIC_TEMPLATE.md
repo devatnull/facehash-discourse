@@ -63,6 +63,7 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - `facehash_avatars_show_initial`
 - `facehash_avatars_inline_render`
 - `facehash_avatars_hover_effect`
+- `facehash_avatars_force_non_center_interactive_tilt`
 - `facehash_avatars_enable_blink`
 - `facehash_avatars_blink_interval_seconds`
 - `facehash_avatars_blink_duration_ms`
@@ -73,6 +74,13 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - `facehash_avatars_foreground_color`
 - `facehash_avatars_hash_source` (`username`, `name`, `name_or_username`)
 - `facehash_avatars_palette`
+
+### Suggested defaults
+
+- Keep `facehash_avatars_inline_render = true` for best interaction consistency.
+- Keep `facehash_avatars_hover_effect = true` for Facehash-like motion behavior.
+- Keep `facehash_avatars_force_non_center_interactive_tilt = true` so center-pose avatars still show hover feedback.
+- Keep `facehash_avatars_auto_foreground_contrast = true` for readability across custom palettes.
 
 ## Technical Notes
 
