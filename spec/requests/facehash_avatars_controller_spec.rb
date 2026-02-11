@@ -68,6 +68,14 @@ describe FacehashDiscourse::AvatarsController do
     expect(response.media_type).to eq("image/png")
   end
 
+  it "serves avatars for usernames containing dots" do
+    get avatar_path(username: "yunus.gunes")
+
+    expect(response.status).to eq(200)
+    expect(response.media_type).to eq("image/svg+xml")
+    expect(response.body).to include("<svg")
+  end
+
   it "uses user full name as seed when hash_source is name" do
     user.update!(name: "Zed Example")
     SiteSetting.facehash_avatars_hash_source = "name"

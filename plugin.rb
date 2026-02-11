@@ -82,6 +82,12 @@ after_initialize do
   end
 
   Discourse::Application.routes.append do
-    get "/facehash_avatar/:username/:size/:version.svg" => "facehash_discourse/avatars#show"
+    get "/facehash_avatar/:username/:size/:version.svg",
+        to: "facehash_discourse/avatars#show",
+        constraints: {
+          username: /[^\/]+/,
+          size: /\d+/,
+          version: /[A-Za-z0-9_-]+/,
+        }
   end
 end
