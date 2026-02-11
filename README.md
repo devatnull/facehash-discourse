@@ -88,6 +88,28 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - Compatible with valid Discourse usernames (including dotted usernames).
 - For stable plugin identity, mount/clone into `discourse-facehash-avatars` directory.
 
+## Production Ops
+
+Facehash avatars are generated dynamically and then cached aggressively. On instances with strict global request throttling, admin sessions (especially with browser DevTools source maps enabled) can burst enough requests to trigger temporary `429` blocks.
+
+If needed, tune Discourse global limits using your deployment config:
+
+```env
+DISCOURSE_MAX_REQS_PER_IP_PER_10_SECONDS=120
+DISCOURSE_MAX_REQS_PER_IP_PER_MINUTE=1200
+DISCOURSE_MAX_ASSET_REQS_PER_IP_PER_10_SECONDS=1000
+DISCOURSE_MAX_REQS_PER_IP_MODE=block
+```
+
+Docker Compose note:
+- Ensure these variables are present in `.env`.
+- Ensure they are also passed in `docker-compose.yml` under the `discourse.environment` list.
+
+## Known Scope
+
+- Replaces only default fallback avatars.
+- Does not modify uploaded user profile pictures.
+
 ## Testing
 
 Run inside a Discourse checkout:

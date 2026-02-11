@@ -85,6 +85,7 @@ Add screenshots here:
 - If avatars look missing after rollout, hard refresh browser cache.
 - Ensure plugin directory inside container is `plugins/discourse-facehash-avatars`.
 - Check Discourse logs for plugin load errors on boot.
+- If admin saves or asset/map requests return `429`, raise Discourse global request limits (`max_reqs_per_ip_*` / `max_asset_reqs_per_ip_per_10_seconds`) to match your traffic pattern.
 
 ## Support
 
