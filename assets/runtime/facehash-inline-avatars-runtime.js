@@ -190,9 +190,16 @@
       return;
     }
 
+    var seed = avatarSeedFromSrc(src);
     var position = readRotationFromSvg(svg);
+
+    // When the deterministic slot is dead-center, hover can look inert.
+    // Use a deterministic non-center interactive tilt for motion feedback.
+    if (position && position.x === 0 && position.y === 0 && seed) {
+      position = pickNonCenterPosition(stringHash(seed));
+    }
+
     if (!position) {
-      var seed = avatarSeedFromSrc(src);
       if (!seed) {
         return;
       }
