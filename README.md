@@ -67,3 +67,4 @@ bundle exec rspec plugins/facehash-discourse/spec
 - If the plugin is disabled, core avatar behavior resumes.
 - When `facehash_avatars_hash_source` is set to `name`/`name_or_username`, the avatar seed is derived from `User#name` when available.
 - Name-based seed lookups are cached and invalidated when a user is updated.
+- Username parsing/validation follows Discourse's `UsernameValidator`, so valid forum usernames are supported while unsafe/invalid path input is rejected.

@@ -17,22 +17,23 @@ module ::FacehashDiscourse
 
     MIN_SIZE = 8
     MAX_SIZE = 1000
-    MAX_USERNAME_LENGTH = 200
 
     def show
       is_asset_path
       no_cookies
 
       return render_blank unless SiteSetting.facehash_avatars_enabled
-      requested_username = params[:username].to_s
-      return render_blank if requested_username.blank? || requested_username.length > MAX_USERNAME_LENGTH
+      requested_username = extract_username_param
+      return render_blank if requested_username.blank?
+      return render_blank unless valid_username_param?(requested_username)
 
       size = params[:size].to_i
       return render_blank if size < MIN_SIZE || size > MAX_SIZE
 
-      avatar_seed = avatar_seed_for(requested_username)
+      normalized_username = User.normalize_username(requested_username) || requested_username.downcase
+      avatar_seed = avatar_seed_for(normalized_username)
       immutable_for(1.year)
-      return unless stale?(etag: avatar_etag(requested_username, avatar_seed, size), public: true)
+      return unless stale?(etag: avatar_etag(normalized_username, avatar_seed, size), public: true)
 
       image =
         ::FacehashDiscourse::AvatarRenderer.new(
@@ -55,11 +56,23 @@ module ::FacehashDiscourse
 
     private
 
-    def avatar_etag(requested_username, avatar_seed, size)
+    def extract_username_param
+      username = params[:username].to_s
+      username.unicode_normalize
+    rescue StandardError
+      nil
+    end
+
+    def valid_username_param?(requested_username)
+      # Keep route behavior aligned with Discourse's own username rules.
+      UsernameValidator.new(requested_username).valid_format?
+    end
+
+    def avatar_etag(normalized_username, avatar_seed, size)
       payload =
         [
           ::FacehashDiscourse::Config.settings_version,
-          requested_username.downcase,
+          normalized_username,
           avatar_seed,
           size,
         ].join("|")
@@ -67,11 +80,11 @@ module ::FacehashDiscourse
       Digest::SHA1.hexdigest(payload)
     end
 
-    def avatar_seed_for(requested_username)
+    def avatar_seed_for(normalized_username)
       hash_source = ::FacehashDiscourse::Config.hash_source
-      return requested_username if hash_source == :username
+      return normalized_username if hash_source == :username
 
-      username_key = requested_username.downcase
+      username_key = normalized_username
       names_enabled_key =
         if SiteSetting.respond_to?(:enable_names)
           SiteSetting.enable_names ? "1" : "0"
@@ -86,23 +99,23 @@ module ::FacehashDiscourse
         )
 
       Discourse.cache.fetch(cache_key, expires_in: 1.hour) do
-        user = find_user_by_username(requested_username)
-        next requested_username if user.blank?
-        next requested_username if SiteSetting.respond_to?(:enable_names) && !SiteSetting.enable_names
+        user = find_user_by_username(normalized_username)
+        next normalized_username if user.blank?
+        next normalized_username if SiteSetting.respond_to?(:enable_names) && !SiteSetting.enable_names
 
         case hash_source
         when :name
-          user.name.presence || requested_username
+          user.name.presence || normalized_username
         when :name_or_username
-          user.name.presence || requested_username
+          user.name.presence || normalized_username
         else
-          requested_username
+          normalized_username
         end
       end
     end
 
-    def find_user_by_username(requested_username)
-      User.find_by(username_lower: requested_username.downcase)
+    def find_user_by_username(normalized_username)
+      User.find_by(username_lower: normalized_username)
     end
 
     def render_blank

@@ -68,6 +68,13 @@ describe FacehashDiscourse::AvatarsController do
     expect(response.media_type).to eq("image/png")
   end
 
+  it "returns fallback image for invalid username format" do
+    get avatar_path(username: "bad//name")
+
+    expect(response.status).to eq(200)
+    expect(response.media_type).to eq("image/png")
+  end
+
   it "serves avatars for usernames containing dots" do
     get avatar_path(username: "yunus.gunes")
 
