@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.18] - 2026-02-11
+
+### Fixed
+
+- Fixed double-face stacking regression by hiding the original Facehash `<img>` only after overlay mount succeeds.
+- Restores fallback visibility automatically when overlay is removed or rebuilds.
+
 ## [0.5.17] - 2026-02-11
 
 ### Fixed

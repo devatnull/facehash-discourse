@@ -307,6 +307,8 @@
     if (existingOverlay && existingOverlay.parentElement) {
       existingOverlay.parentElement.removeChild(existingOverlay);
     }
+
+    img.classList.remove("facehash-inline-hidden-safe");
   }
 
   function ensureHostLayout(host) {
@@ -397,6 +399,7 @@
       }
 
       host.appendChild(wrapper);
+      img.classList.add("facehash-inline-hidden-safe");
       img.setAttribute(SIGNATURE_ATTR, signatureForImage(img));
       img.setAttribute(PROCESSED_ATTR, "done");
     });
