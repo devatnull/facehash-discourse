@@ -1,0 +1,6 @@
+{
+  "name": "discourse-facehash-avatars",
+  "about_url": "https://github.com/devatnull/facehash-discourse",
+  "license_url": "https://github.com/devatnull/facehash-discourse/blob/master/LICENSE",
+  "component": false
+}
