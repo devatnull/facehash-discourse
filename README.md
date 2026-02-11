@@ -1,19 +1,69 @@
 # discourse-facehash-avatars
 
-Deterministic Facehash avatars for Discourse default avatar slots.
+Facehash-style avatars for Discourse default avatar slots.
 
-This plugin replaces Discourse default avatars for users without an uploaded profile picture. Users with uploaded avatars are unchanged.
+This plugin replaces Discourse fallback avatars with deterministic, friendly SVG faces for users who have not uploaded a custom profile image. If a user has uploaded their own avatar, that image stays untouched.
+
+## What Is Facehash?
+
+[Facehash](https://www.facehash.dev/) is an avatar system by cossistant that generates a consistent face from any string input (username, email, UUID, bot ID, etc.). The same input always produces the same face.
+
+Why this style is useful:
+- No external avatar service calls.
+- No avatar storage pipeline required for fallback images.
+- Deterministic output that remains stable across sessions and pages.
+- Lightweight SVG output that is easy to cache.
+
+This plugin adapts that concept for Discourse default-avatar behavior.
 
 ## Official Links
 
-- Repository: https://github.com/devatnull/facehash-discourse
-- Meta topic: TODO (add after publishing on Meta)
+- Plugin repository: [github.com/devatnull/facehash-discourse](https://github.com/devatnull/facehash-discourse)
+- Facehash website: [facehash.dev](https://www.facehash.dev/)
+- Upstream package: [npmjs.com/package/facehash](https://www.npmjs.com/package/facehash)
+- Meta topic: `TODO` (add after publishing on Meta)
 - Changelog: `CHANGELOG.md`
+
+## Quick Example
+
+Facehash React usage from upstream:
+
+```tsx
+import { Facehash } from "facehash";
+
+<Facehash name="agent-47" size={48} />;
+```
+
+Discourse plugin equivalent behavior:
+- Discourse asks for default avatar template URL.
+- Plugin serves deterministic SVG from:
+
+```text
+/facehash_avatar/:username/:size/:version.svg
+```
+
+Example:
+
+```text
+/facehash_avatar/yunus.gunes/48/3210236103.svg
+```
+
+## Screenshots
+
+Facehash source demos captured from [facehash.dev](https://www.facehash.dev/):
+
+![Facehash demo - John Constantin](screenshots/facehash-dev-try-john-constantin.png)
+![Facehash demo - John Doe](screenshots/facehash-dev-try-john-doe.png)
+
+Plugin behavior on Discourse (anonymized):
+
+![Discourse latest view with Facehash avatars](screenshots/facehash-latest-anon-v2.png)
+![Discourse topic view with Facehash avatars](screenshots/facehash-topic-anon-v2.png)
 
 ## Installation
 
 Follow the official Discourse plugin installation guide:
-- https://meta.discourse.org/t/install-a-plugin/19157
+- [meta.discourse.org/t/install-a-plugin/19157](https://meta.discourse.org/t/install-a-plugin/19157)
 
 ### Docker Launcher (`app.yml`)
 
@@ -64,7 +114,26 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 
 1. Go to `Admin -> Settings`.
 2. Search for `facehash_avatars`.
-3. Configure settings below.
+3. Configure your defaults.
+
+## Supported Facehash-Style Features
+
+This plugin currently supports these configurable behaviors:
+
+- Deterministic seed source (`username`, `name`, `name_or_username`)
+- Shape (`round`, `squircle`, `square`)
+- Variant (`gradient` or `solid`)
+- Show/hide initial
+- Custom color palette
+- Auto foreground contrast or manual foreground color
+- Blink animation (global enable + interval + duration)
+- Inline overlay rendering for post lists/streams
+- Face-level hover effect in inline overlays
+
+Not currently exposed (by design in this plugin):
+- React-only APIs such as `onRenderMouth` and component-level `className`
+- Upstream `intensity3d` prop
+- Upstream `Avatar/AvatarImage/AvatarFallback` wrapper API
 
 ## Settings
 
@@ -80,7 +149,7 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_blink_interval_seconds` | `8` | Blink loop interval in seconds (clamped to 2..30). |
 | `facehash_avatars_blink_duration_ms` | `140` | Blink close/open duration in milliseconds (clamped to 80..2000). |
 | `facehash_avatars_shape` | `round` | Avatar mask shape: `round`, `squircle`, or `square`. |
-| `facehash_avatars_font_family` | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif` | Initial text `font-family` used in SVG output. |
+| `facehash_avatars_font_family` | `FacehashGeistPixel, "Geist Pixel Square", "Geist Pixel", "Geist Mono", ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, Monaco, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace` | Initial text `font-family` used in SVG output. Default uses bundled Geist Pixel (Square) with monospace fallbacks. |
 | `facehash_avatars_font_weight` | `600` | Initial text `font-weight` (`100`..`900` or `normal/bold`). |
 | `facehash_avatars_auto_foreground_contrast` | `true` | Auto-select black/white foreground for legibility. |
 | `facehash_avatars_foreground_color` | `#111827` | Manual foreground color when auto contrast is disabled. |
@@ -90,26 +159,24 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 ## Behavior
 
 - Route shape: `/facehash_avatar/:username/{size}/:version.svg`
+- Bundled font route: `/facehash_avatar/font/GeistPixel-Square.woff2`
 - Response type: `image/svg+xml`
-- Cache: `immutable` 1-year cache with `ETag` support
+- Cache: immutable 1-year cache plus `ETag`
 - Uploaded avatars: unchanged
+- Determinism: same seed input returns same avatar output
 
 ## Security And Validation
 
 - Username parsing/validation is aligned with Discourse `UsernameValidator`.
 - Invalid username payloads fall back safely to the core blank avatar image.
 - Name-based hash source lookups are cached and invalidated on user updates.
-
-## Compatibility Notes
-
-- Compatible with valid Discourse usernames (including dotted usernames).
-- For stable plugin identity, mount/clone into `discourse-facehash-avatars` directory.
+- Inline client renderer avoids destructive DOM reparenting to stay compatible with modern Discourse Glimmer rendering.
 
 ## Production Ops
 
-Facehash avatars are generated dynamically and then cached aggressively. On instances with strict global request throttling, admin sessions (especially with browser DevTools source maps enabled) can burst enough requests to trigger temporary `429` blocks.
+Facehash avatars are generated dynamically and cached aggressively. On instances with strict global request throttling, admin sessions (especially with browser DevTools source maps enabled) can burst enough requests to trigger temporary `429` blocks.
 
-If needed, tune Discourse global limits using your deployment config:
+If needed, tune Discourse global limits:
 
 ```env
 DISCOURSE_MAX_REQS_PER_IP_PER_10_SECONDS=120
@@ -120,37 +187,34 @@ DISCOURSE_MAX_REQS_PER_IP_MODE=block
 
 Docker Compose note:
 - Ensure these variables are present in `.env`.
-- Ensure they are also passed in `docker-compose.yml` under the `discourse.environment` list.
-
-## Known Scope
-
-- Replaces only default fallback avatars.
-- Does not modify uploaded user profile pictures.
-- Avatars stay deterministic by design (same seed always returns the same avatar).
-- `facehash_avatars_palette` is a deterministic color pool. Each user maps to a stable color from that pool.
-- Client-side inline overlay mode is intentionally non-destructive to stay compatible with Discourse Glimmer rendering while preserving hover/blink visuals.
+- Ensure they are also passed in `docker-compose.yml` under `discourse.environment`.
 
 ## Testing
 
-Run inside a Discourse checkout:
+Run Ruby specs inside a Discourse checkout:
 
 ```bash
 bundle exec rspec plugins/discourse-facehash-avatars/spec
 ```
 
-Run plugin acceptance test suite:
+Run QUnit acceptance tests:
 
 ```bash
 rake plugin:qunit['discourse-facehash-avatars']
 ```
 
-## Meta Topic
+## Publishing Checklist
 
-Use this template to publish your official Meta topic:
-- `docs/META_TOPIC_TEMPLATE.md`
+- Meta topic template: `docs/META_TOPIC_TEMPLATE.md`
+- Launch checklist: `docs/PUBLISH_CHECKLIST.md`
 
-After posting, replace `TODO` in the **Official Links** section above with the live Meta URL.
+After publishing on Meta, replace `TODO` in **Official Links** with the live topic URL.
 
 ## License
 
 MIT
+
+### Third-party font license
+
+- Geist Pixel (`GeistPixel-Square.woff2`) is bundled under SIL Open Font License 1.1.
+- License file: `licenses/third_party/Geist-OFL-1.1.txt`

@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
+require "digest"
 require "zlib"
 
 module ::FacehashDiscourse
   module Config
+    BUNDLED_GEIST_PIXEL_FONT_FAMILY = "FacehashGeistPixel".freeze
+    BUNDLED_GEIST_PIXEL_FONT_FILENAME = "GeistPixel-Square.woff2".freeze
+    BUNDLED_GEIST_PIXEL_FONT_PATH =
+      File.expand_path("../../assets/fonts/#{BUNDLED_GEIST_PIXEL_FONT_FILENAME}", __dir__)
     DEFAULT_COLORS =
       %w[#0f766e #0ea5a4 #2563eb #4f46e5 #9333ea #be185d #ea580c #ca8a04 #15803d #334155].freeze
     COLOR_REGEX = /\A#[0-9A-Fa-f]{3,8}\z/
@@ -108,6 +113,29 @@ module ::FacehashDiscourse
     def foreground_color
       candidate = SiteSetting.facehash_avatars_foreground_color.to_s.strip
       COLOR_REGEX.match?(candidate) ? candidate : "#000000"
+    end
+
+    def bundled_geist_pixel_font_family
+      BUNDLED_GEIST_PIXEL_FONT_FAMILY
+    end
+
+    def bundled_geist_pixel_font_data
+      return nil unless File.file?(BUNDLED_GEIST_PIXEL_FONT_PATH)
+
+      @bundled_geist_pixel_font_data ||= File.binread(BUNDLED_GEIST_PIXEL_FONT_PATH).freeze
+    rescue StandardError
+      nil
+    end
+
+    def bundled_geist_pixel_font_etag
+      data = bundled_geist_pixel_font_data
+      return nil if data.nil?
+
+      @bundled_geist_pixel_font_etag ||= Digest::SHA1.hexdigest(data)
+    end
+
+    def bundled_geist_pixel_font_url
+      "#{Discourse.base_path}/facehash_avatar/font/#{BUNDLED_GEIST_PIXEL_FONT_FILENAME}"
     end
   end
 end

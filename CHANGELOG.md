@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.20] - 2026-02-11
+
+### Added
+
+- Bundled official `GeistPixel-Square.woff2` font asset (SIL OFL 1.1).
+- New font delivery endpoint: `/facehash_avatar/font/GeistPixel-Square.woff2` with immutable caching and ETag.
+- Third-party font license file: `licenses/third_party/Geist-OFL-1.1.txt`.
+
+### Changed
+
+- Avatar SVG output now includes `@font-face` mapping for bundled Geist Pixel when rendering initials, so the pixel font is available consistently across devices without requiring local font installation.
+- Default `facehash_avatars_font_family` now prefers bundled Geist Pixel with monospace fallbacks.
+
 ## [0.5.19] - 2026-02-11
 
 ### Fixed

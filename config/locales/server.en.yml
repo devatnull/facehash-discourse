@@ -10,7 +10,7 @@ en:
     facehash_avatars_blink_interval_seconds: "Blink animation loop interval in seconds (recommended 3 to 12)"
     facehash_avatars_blink_duration_ms: "Blink closing/opening duration in milliseconds (recommended 80 to 400)"
     facehash_avatars_shape: "Avatar mask shape: round, squircle, or square"
-    facehash_avatars_font_family: "SVG font-family used for initials (for example: monospace, Inter, 'Open Sans', sans-serif)"
+    facehash_avatars_font_family: "SVG font-family used for initials. Default uses bundled Geist Pixel with monospace fallbacks (for example: FacehashGeistPixel, ui-monospace, monospace)"
     facehash_avatars_font_weight: "SVG font-weight used for initials (for example: 400, 600, 700, bold)"
     facehash_avatars_auto_foreground_contrast: "Auto-pick black or white face/text color based on avatar background brightness"
     facehash_avatars_foreground_color: "Manual face/text color when auto contrast is disabled (hex like #000000)"

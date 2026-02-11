@@ -2,7 +2,7 @@
 
 # name: discourse-facehash-avatars
 # about: Replaces Discourse default avatars with deterministic Facehash avatars for users without uploaded profile pictures.
-# version: 0.5.19
+# version: 0.5.20
 # authors: devatnull
 # url: https://github.com/devatnull/facehash-discourse
 
@@ -100,6 +100,12 @@ after_initialize do
   end
 
   Discourse::Application.routes.append do
+    get "/facehash_avatar/font/:filename",
+        to: "facehash_discourse/avatars#font",
+        constraints: {
+          filename: /GeistPixel-Square\.woff2/,
+        }
+
     get "/facehash_avatar/:username/:size/:version.svg",
         to: "facehash_discourse/avatars#show",
         constraints: {

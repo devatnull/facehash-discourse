@@ -9,6 +9,10 @@ describe FacehashDiscourse::AvatarsController do
     "/facehash_avatar/#{username}/#{size}/#{version}.svg"
   end
 
+  def bundled_font_path
+    "/facehash_avatar/font/GeistPixel-Square.woff2"
+  end
+
   before do
     Discourse.cache.clear
     SiteSetting.facehash_avatars_enabled = true
@@ -32,6 +36,28 @@ describe FacehashDiscourse::AvatarsController do
     expect(response.media_type).to eq("image/svg+xml")
     expect(response.body).to include("<svg")
     expect(response.body).to include("aria-label=\"Facehash avatar\"")
+    expect(response.headers["Cache-Control"]).to include("immutable")
+    expect(response.headers["ETag"]).to be_present
+    expect(response.headers["X-Content-Type-Options"]).to eq("nosniff")
+  end
+
+  it "includes bundled Geist Pixel @font-face in rendered svg" do
+    SiteSetting.facehash_avatars_font_family = "FacehashGeistPixel, monospace"
+
+    get avatar_path
+
+    expect(response.status).to eq(200)
+    expect(response.body).to include("@font-face")
+    expect(response.body).to include("FacehashGeistPixel")
+    expect(response.body).to include(bundled_font_path)
+  end
+
+  it "serves bundled Geist Pixel font with immutable caching" do
+    get bundled_font_path
+
+    expect(response.status).to eq(200)
+    expect(response.media_type).to eq("font/woff2")
+    expect(response.body.bytesize).to be > 1000
     expect(response.headers["Cache-Control"]).to include("immutable")
     expect(response.headers["ETag"]).to be_present
     expect(response.headers["X-Content-Type-Options"]).to eq("nosniff")

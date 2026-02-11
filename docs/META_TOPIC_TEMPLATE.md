@@ -81,6 +81,7 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - Keep `facehash_avatars_hover_effect = true` for Facehash-like face-level hover motion.
 - Keep `facehash_avatars_force_non_center_interactive_tilt = true` so center-pose avatars still show hover feedback.
 - Keep `facehash_avatars_auto_foreground_contrast = true` for readability across custom palettes.
+- Keep `facehash_avatars_font_family` at default to use bundled Geist Pixel initials with robust monospace fallback.
 
 ## Technical Notes
 

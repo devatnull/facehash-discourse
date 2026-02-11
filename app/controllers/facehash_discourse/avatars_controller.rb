@@ -11,9 +11,9 @@ module ::FacehashDiscourse
                        :redirect_to_profile_if_required,
                        :check_xhr,
                        :verify_authenticity_token,
-                       only: %i[show]
+                       only: %i[show font]
 
-    before_action :apply_cdn_headers, only: %i[show]
+    before_action :apply_cdn_headers, only: %i[show font]
 
     MIN_SIZE = 8
     MAX_SIZE = 1000
@@ -47,6 +47,7 @@ module ::FacehashDiscourse
           shape: ::FacehashDiscourse::Config.shape,
           font_family: ::FacehashDiscourse::Config.font_family,
           font_weight: ::FacehashDiscourse::Config.font_weight,
+          font_face_url: ::FacehashDiscourse::Config.bundled_geist_pixel_font_url,
           foreground_color: ::FacehashDiscourse::Config.foreground_color,
           auto_foreground_contrast: ::FacehashDiscourse::Config.auto_foreground_contrast?,
           colors: ::FacehashDiscourse::Config.colors,
@@ -60,6 +61,27 @@ module ::FacehashDiscourse
         "[#{::FacehashDiscourse::PLUGIN_NAME}] Failed to render avatar for username=#{params[:username]} size=#{params[:size]} version=#{params[:version]}: #{e.class}: #{e.message}",
       )
       render_blank
+    end
+
+    def font
+      is_asset_path
+      no_cookies
+
+      font_data = ::FacehashDiscourse::Config.bundled_geist_pixel_font_data
+      font_etag = ::FacehashDiscourse::Config.bundled_geist_pixel_font_etag
+      return head :not_found if font_data.nil? || font_etag.nil?
+
+      immutable_for(1.year)
+      return unless stale?(etag: font_etag, public: true)
+
+      response.headers["X-Content-Type-Options"] = "nosniff"
+      response.headers["Content-Length"] = font_data.bytesize.to_s
+      send_data font_data, type: "font/woff2", disposition: "inline"
+    rescue StandardError => e
+      Rails.logger.warn(
+        "[#{::FacehashDiscourse::PLUGIN_NAME}] Failed to serve bundled Geist Pixel font: #{e.class}: #{e.message}",
+      )
+      head :not_found
     end
 
     private

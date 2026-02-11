@@ -68,6 +68,7 @@ module ::FacehashDiscourse
       blink_duration_ms: 140,
       font_family: "monospace",
       font_weight: "700",
+      font_face_url: nil,
       foreground_color: "#000000",
       auto_foreground_contrast: true
     )
@@ -85,6 +86,7 @@ module ::FacehashDiscourse
       @font_family = font_family.to_s.strip
       @font_family = "monospace" if @font_family.empty?
       @font_weight = sanitize_font_weight(font_weight)
+      @font_face_url = font_face_url.to_s.strip
       @foreground_color = foreground_color.to_s
       @auto_foreground_contrast = !!auto_foreground_contrast
     end
@@ -126,6 +128,7 @@ module ::FacehashDiscourse
       svg =
         +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar" data-facehash="">)
       svg << blink_style_markup(blink_animation_id, blink_interval) if @enable_blink
+      svg << font_face_markup if uses_bundled_geist_pixel_font?
 
       if @variant == :gradient
         defs << <<~OVERLAY.strip
@@ -295,6 +298,31 @@ module ::FacehashDiscourse
           }
         </style>
       STYLE
+    end
+
+    def font_face_markup
+      escaped_url = CGI.escapeHTML(@font_face_url)
+      font_family = CGI.escapeHTML(::FacehashDiscourse::Config.bundled_geist_pixel_font_family)
+
+      <<~STYLE.strip
+        <style>
+          @font-face {
+            font-family: '#{font_family}';
+            src: url('#{escaped_url}') format('woff2');
+            font-style: normal;
+            font-weight: 500;
+            font-display: block;
+          }
+        </style>
+      STYLE
+    end
+
+    def uses_bundled_geist_pixel_font?
+      return false unless @show_initial
+      return false if @font_face_url.empty?
+
+      family = @font_family.downcase
+      family.include?("facehashgeistpixel") || family.include?("geist pixel")
     end
 
     def blink_interval_seconds_for_avatar

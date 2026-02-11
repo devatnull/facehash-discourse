@@ -109,6 +109,24 @@ describe FacehashDiscourse::AvatarRenderer do
     expect(svg).to include('font-weight="600"')
   end
 
+  it "embeds bundled Geist Pixel @font-face when a font URL is provided" do
+    renderer =
+      described_class.new(
+        name: "alice",
+        size: 64,
+        variant: :solid,
+        show_initial: true,
+        colors: colors,
+        font_family: "FacehashGeistPixel, monospace",
+        font_face_url: "/facehash_avatar/font/GeistPixel-Square.woff2",
+      )
+
+    svg = renderer.to_svg
+    expect(svg).to include("@font-face")
+    expect(svg).to include("FacehashGeistPixel")
+    expect(svg).to include("/facehash_avatar/font/GeistPixel-Square.woff2")
+  end
+
   it "uses white foreground when auto contrast is enabled on dark backgrounds" do
     renderer =
       described_class.new(
