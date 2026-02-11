@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.16] - 2026-02-11
+
+### Fixed
+
+- Restored face-level hover interactions using a non-destructive inline overlay strategy.
+- Keeps original Ember/Glimmer-managed avatar `<img>` nodes in place (no reparenting/replacement), avoiding `NotFoundError: removeChild` rerender conflicts.
+- Added overlay lifecycle cleanup/re-sync logic for dynamic post stream updates.
+- Preserved deterministic interactive tilt behavior, including non-center fallback for center-pose avatars.
+- Keeps deprecated `Discourse.SiteSettings` access out of runtime path.
+
+## [0.5.15] - 2026-02-11
+
+### Fixed
+
+- Reworked inline runtime to use a non-destructive enhancement mode:
+  - removed avatar `<img>` node reparenting/replacement behavior
+  - removed duplicate client-side fetch/parsing of avatar SVG URLs
+- Prevents Glimmer/Ember DOM ownership conflicts (`NotFoundError: removeChild`) seen in post stream rerenders.
+- Removed deprecated client setting access path (`Discourse.SiteSettings`) from runtime usage.
+
 ## [0.5.14] - 2026-02-11
 
 ### Fixed

@@ -6,6 +6,10 @@
   overflow: hidden;
 }
 
+.facehash-inline-overlay {
+  pointer-events: none;
+}
+
 td.posters .facehash-inline-avatar,
 .topic-list-data .facehash-inline-avatar {
   border: none !important;
@@ -19,13 +23,8 @@ td.posters .facehash-inline-avatar,
   height: 100%;
 }
 
-.facehash-inline-avatar > img.facehash-inline-hidden {
-  position: absolute !important;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  pointer-events: none;
+img.facehash-inline-hidden-safe {
+  opacity: 0 !important;
 }
 
 .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face {
@@ -46,14 +45,16 @@ td.posters .facehash-inline-avatar,
     translateY(var(--fh-ty, 0px));
 }
 
-.facehash-inline-avatar.facehash-inline-hover:hover .facehash-inline-interactive-face {
+img.facehash-inline-hidden-safe:hover + .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face,
+a:hover > img.facehash-inline-hidden-safe + .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face {
   transform:
     rotateX(0deg)
     rotateY(0deg)
     translateZ(var(--fh-tz, 0px));
 }
 
-.facehash-inline-avatar.facehash-inline-hover.facehash-inline-small:hover .facehash-inline-interactive-face {
+img.facehash-inline-hidden-safe:hover + .facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face,
+a:hover > img.facehash-inline-hidden-safe + .facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face {
   transform:
     translateX(0px)
     translateY(0px);

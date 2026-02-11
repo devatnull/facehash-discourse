@@ -7,8 +7,14 @@
   window.__facehashInlineAvatarsBooted = true;
 
   var PROCESSED_ATTR = "data-facehash-inline-state";
+  var TOKEN_ATTR = "data-facehash-inline-token";
+  var SIGNATURE_ATTR = "data-facehash-inline-signature";
+  var OVERLAY_CLASS = "facehash-inline-overlay";
+  var OVERLAY_FOR_ATTR = "data-facehash-inline-for";
   var SVG_CACHE = new Map();
   var INFLIGHT = new Map();
+  var NEXT_TOKEN_ID = 1;
+
   var INTERACTIVE_SPHERE_POSITIONS = [
     { x: -1, y: 1 },
     { x: 1, y: 1 },
@@ -29,7 +35,11 @@
   var SMALL_AVATAR_THRESHOLD = 28;
 
   function readSiteSettings() {
-    return (window.Discourse && window.Discourse.SiteSettings) || window.siteSettings || {};
+    if (window.siteSettings && typeof window.siteSettings === "object") {
+      return window.siteSettings;
+    }
+
+    return {};
   }
 
   function readBoolSetting(key, fallback) {
@@ -60,12 +70,20 @@
       return false;
     }
 
-    if (img.getAttribute(PROCESSED_ATTR)) {
-      return false;
-    }
-
     var src = img.currentSrc || img.src || "";
     return src.indexOf("/facehash_avatar/") !== -1 && src.indexOf(".svg") !== -1;
+  }
+
+  function ensureToken(img) {
+    var token = img.getAttribute(TOKEN_ATTR);
+    if (token) {
+      return token;
+    }
+
+    token = "fh-" + NEXT_TOKEN_ID;
+    NEXT_TOKEN_ID += 1;
+    img.setAttribute(TOKEN_ATTR, token);
+    return token;
   }
 
   function resolveAvatarSize(img) {
@@ -88,6 +106,12 @@
     }
 
     return { width: 40, height: 40 };
+  }
+
+  function signatureForImage(img) {
+    var src = img.currentSrc || img.src || "";
+    var size = resolveAvatarSize(img);
+    return src + "|" + size.width + "x" + size.height;
   }
 
   function fetchSvgText(src) {
@@ -201,8 +225,6 @@
     var seed = avatarSeedFromSrc(src);
     var position = readRotationFromSvg(svg);
 
-    // When the deterministic slot is dead-center, hover can look inert.
-    // Use a deterministic non-center interactive tilt for motion feedback.
     if (
       forceNonCenterInteractiveTiltEnabled() &&
       position &&
@@ -222,6 +244,7 @@
 
     wrapper.classList.add("facehash-inline-hover");
     target.classList.add("facehash-inline-interactive-face");
+
     var knownWidth = size && Number.isFinite(size.width) ? size.width : 0;
     var knownHeight = size && Number.isFinite(size.height) ? size.height : 0;
     var maxDim = Math.max(knownWidth, knownHeight);
@@ -229,6 +252,7 @@
       var rect = wrapper.getBoundingClientRect();
       maxDim = Math.max(rect.width || 0, rect.height || 0);
     }
+
     var isSmallAvatar = maxDim > 0 && maxDim <= SMALL_AVATAR_THRESHOLD;
     var rotateRange = isSmallAvatar ? INTERACTIVE_ROTATE_RANGE_SMALL : INTERACTIVE_ROTATE_RANGE;
     var translateZ = isSmallAvatar ? INTERACTIVE_TRANSLATE_Z_SMALL : INTERACTIVE_TRANSLATE_Z;
@@ -264,12 +288,35 @@
     return svg;
   }
 
-  function buildWrapper(img, svg, withHover) {
-    var size = resolveAvatarSize(img);
+  function findOverlayForToken(token) {
+    if (!token) {
+      return null;
+    }
+
+    return document.querySelector('.' + OVERLAY_CLASS + '[' + OVERLAY_FOR_ATTR + '="' + token + '"]');
+  }
+
+  function clearOverlayForImage(img) {
+    if (!(img instanceof HTMLImageElement)) {
+      return;
+    }
+
+    var token = img.getAttribute(TOKEN_ATTR);
+    var existingOverlay = findOverlayForToken(token);
+    if (existingOverlay && existingOverlay.parentElement) {
+      existingOverlay.parentElement.removeChild(existingOverlay);
+    }
+
+    img.classList.remove("facehash-inline-hidden-safe");
+  }
+
+  function buildOverlay(img, svg, withHover, size) {
     var wrapper = document.createElement("span");
-    wrapper.className = (img.className || "") + " facehash-inline-avatar";
+    wrapper.className = (img.className || "") + " facehash-inline-avatar " + OVERLAY_CLASS;
     wrapper.style.width = size.width + "px";
     wrapper.style.height = size.height + "px";
+    wrapper.style.marginLeft = -size.width + "px";
+
     var imgComputedStyle = window.getComputedStyle(img);
     if (imgComputedStyle && imgComputedStyle.borderRadius) {
       wrapper.style.borderRadius = imgComputedStyle.borderRadius;
@@ -281,39 +328,61 @@
     svg.setAttribute("height", "100%");
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-    img.classList.add("facehash-inline-hidden");
-    img.setAttribute("aria-hidden", "true");
-
     var src = img.currentSrc || img.src || "";
     applyInteractiveTilt(wrapper, svg, src, withHover, size);
 
+    wrapper.appendChild(svg);
     return wrapper;
   }
 
-  function upgradeImage(img, withHover) {
-    if (!isFacehashAvatarImage(img) || !img.parentElement || img.closest(".facehash-inline-avatar")) {
+  function enhanceImage(img, withHover) {
+    if (!isFacehashAvatarImage(img) || !img.parentElement) {
       return;
     }
 
+    var signature = signatureForImage(img);
+    if (img.getAttribute(PROCESSED_ATTR) === "done" && img.getAttribute(SIGNATURE_ATTR) === signature) {
+      var existingToken = img.getAttribute(TOKEN_ATTR);
+      if (existingToken && findOverlayForToken(existingToken)) {
+        return;
+      }
+    }
+
+    if (img.getAttribute(PROCESSED_ATTR) === "pending") {
+      return;
+    }
+
+    clearOverlayForImage(img);
     img.setAttribute(PROCESSED_ATTR, "pending");
 
     var src = img.currentSrc || img.src;
     fetchSvgText(src).then(function (svgText) {
-      if (!svgText || !img.parentElement) {
+      if (!svgText || !img.parentElement || !img.isConnected) {
         img.setAttribute(PROCESSED_ATTR, "failed");
+        return;
+      }
+
+      var latestSrc = img.currentSrc || img.src || "";
+      if (latestSrc !== src) {
+        img.setAttribute(PROCESSED_ATTR, "stale");
+        scheduleScan(img, withHover);
         return;
       }
 
       var svg = parseSvg(svgText);
-      if (!svg || !img.parentElement) {
+      if (!svg) {
         img.setAttribute(PROCESSED_ATTR, "failed");
         return;
       }
 
-      var wrapper = buildWrapper(img, svg, withHover);
-      img.parentElement.insertBefore(wrapper, img);
-      wrapper.appendChild(img);
-      wrapper.appendChild(svg);
+      var size = resolveAvatarSize(img);
+      var wrapper = buildOverlay(img, svg, withHover, size);
+      var token = ensureToken(img);
+      wrapper.setAttribute(OVERLAY_FOR_ATTR, token);
+
+      img.classList.add("facehash-inline-hidden-safe");
+      img.insertAdjacentElement("afterend", wrapper);
+      img.setAttribute(SIGNATURE_ATTR, signatureForImage(img));
       img.setAttribute(PROCESSED_ATTR, "done");
     });
   }
@@ -339,10 +408,27 @@
     return images;
   }
 
+  function cleanupOrphanOverlays() {
+    var overlays = document.querySelectorAll('.' + OVERLAY_CLASS + '[' + OVERLAY_FOR_ATTR + ']');
+    overlays.forEach(function (overlay) {
+      var token = overlay.getAttribute(OVERLAY_FOR_ATTR);
+      if (!token) {
+        overlay.remove();
+        return;
+      }
+
+      var img = document.querySelector('img[' + TOKEN_ATTR + '="' + token + '"]');
+      if (!img || !img.isConnected) {
+        overlay.remove();
+      }
+    });
+  }
+
   function scheduleScan(root, withHover) {
     var run = function () {
+      cleanupOrphanOverlays();
       collectAvatarImages(root).forEach(function (img) {
-        upgradeImage(img, withHover);
+        enhanceImage(img, withHover);
       });
     };
 
@@ -351,6 +437,20 @@
     } else {
       window.setTimeout(run, 16);
     }
+  }
+
+  function resetIfTrackedImage(target) {
+    if (!(target instanceof HTMLImageElement)) {
+      return;
+    }
+
+    if (!isFacehashAvatarImage(target) && !target.getAttribute(TOKEN_ATTR)) {
+      return;
+    }
+
+    clearOverlayForImage(target);
+    target.removeAttribute(PROCESSED_ATTR);
+    target.removeAttribute(SIGNATURE_ATTR);
   }
 
   function boot() {
@@ -363,16 +463,38 @@
 
     var observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
-        mutation.addedNodes.forEach(function (node) {
-          if (node instanceof Element) {
-            scheduleScan(node, withHover);
-          }
-        });
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach(function (node) {
+            if (node instanceof Element) {
+              scheduleScan(node, withHover);
+            }
+          });
+
+          mutation.removedNodes.forEach(function (node) {
+            if (node instanceof HTMLImageElement) {
+              clearOverlayForImage(node);
+            } else if (node instanceof Element) {
+              node.querySelectorAll("img[" + TOKEN_ATTR + "]").forEach(function (img) {
+                clearOverlayForImage(img);
+              });
+            }
+          });
+        }
+
+        if (mutation.type === "attributes") {
+          resetIfTrackedImage(mutation.target);
+          scheduleScan(mutation.target, withHover);
+        }
       });
     });
 
     if (document.body) {
-      observer.observe(document.body, { childList: true, subtree: true });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src", "srcset", "width", "height"],
+      });
     }
   }
 
