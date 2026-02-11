@@ -39,10 +39,6 @@ describe FacehashDiscourse::Config do
     expect(described_class.shape).to eq(:round)
   end
 
-  it "uses a fixed flat 3d intensity" do
-    expect(described_class.intensity_3d).to eq(:none)
-  end
-
   it "clamps blink interval to safe bounds" do
     SiteSetting.facehash_avatars_blink_interval_seconds = 500
 

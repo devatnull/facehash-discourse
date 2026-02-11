@@ -55,7 +55,7 @@ describe FacehashDiscourse::AvatarRenderer do
     expect(renderer.to_svg).not_to include("clip-path=")
   end
 
-  it "supports disabling 3d intensity" do
+  it "renders a dedicated face layer for client-side interaction" do
     renderer =
       described_class.new(
         name: "alice",
@@ -63,11 +63,13 @@ describe FacehashDiscourse::AvatarRenderer do
         variant: :solid,
         show_initial: true,
         colors: colors,
-        intensity_3d: :none,
       )
 
-    expect(renderer.to_svg).not_to include("feDropShadow")
-    expect(renderer.to_svg).not_to include("facehash-highlight-")
+    svg = renderer.to_svg
+    expect(svg).to include('data-facehash=""')
+    expect(svg).to include('data-facehash-face=""')
+    expect(svg).to include('data-facehash-rotation-x="')
+    expect(svg).to include('data-facehash-rotation-y="')
   end
 
   it "supports blink animation markup" do

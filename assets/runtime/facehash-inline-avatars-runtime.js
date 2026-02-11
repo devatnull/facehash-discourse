@@ -135,33 +135,75 @@
     }
   }
 
-  function applyInteractiveTilt(wrapper, src, withHover) {
-    if (!withHover) {
-      return;
-    }
-
-    var seed = avatarSeedFromSrc(src);
-    if (!seed) {
-      return;
-    }
-
-    var hash = stringHash(seed);
+  function pickNonCenterPosition(hash) {
     var position =
       INTERACTIVE_SPHERE_POSITIONS[hash % INTERACTIVE_SPHERE_POSITIONS.length] || { x: 0, y: 0 };
+
     if (position.x === 0 && position.y === 0) {
       for (var i = 0; i < INTERACTIVE_SPHERE_POSITIONS.length; i += 1) {
         var idx = (hash + 3 + i) % INTERACTIVE_SPHERE_POSITIONS.length;
         var candidate = INTERACTIVE_SPHERE_POSITIONS[idx];
         if (candidate && (candidate.x !== 0 || candidate.y !== 0)) {
-          position = candidate;
-          break;
+          return candidate;
         }
       }
     }
 
-    wrapper.style.setProperty("--fh-rx", position.x * INTERACTIVE_ROTATE_RANGE + "deg");
-    wrapper.style.setProperty("--fh-ry", position.y * INTERACTIVE_ROTATE_RANGE + "deg");
-    wrapper.style.setProperty("--fh-tz", INTERACTIVE_TRANSLATE_Z + "px");
+    return position;
+  }
+
+  function readRotationFromSvg(svg) {
+    if (!(svg instanceof SVGElement)) {
+      return null;
+    }
+
+    var faceLayer = svg.querySelector("[data-facehash-face]");
+    if (!faceLayer) {
+      return null;
+    }
+
+    var x = parseFloat(faceLayer.getAttribute("data-facehash-rotation-x"));
+    var y = parseFloat(faceLayer.getAttribute("data-facehash-rotation-y"));
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null;
+    }
+
+    return { x: x, y: y };
+  }
+
+  function resolveInteractiveTarget(svg) {
+    if (!(svg instanceof SVGElement)) {
+      return null;
+    }
+
+    return svg.querySelector("[data-facehash-face]") || svg;
+  }
+
+  function applyInteractiveTilt(wrapper, svg, src, withHover) {
+    if (!withHover) {
+      return;
+    }
+
+    var target = resolveInteractiveTarget(svg);
+    if (!target) {
+      return;
+    }
+
+    var position = readRotationFromSvg(svg);
+    if (!position) {
+      var seed = avatarSeedFromSrc(src);
+      if (!seed) {
+        return;
+      }
+      position = pickNonCenterPosition(stringHash(seed));
+    }
+
+    wrapper.classList.add("facehash-inline-hover");
+    target.classList.add("facehash-inline-interactive-face");
+    target.style.setProperty("--fh-rx", position.x * INTERACTIVE_ROTATE_RANGE + "deg");
+    target.style.setProperty("--fh-ry", position.y * INTERACTIVE_ROTATE_RANGE + "deg");
+    target.style.setProperty("--fh-tz", INTERACTIVE_TRANSLATE_Z + "px");
     wrapper.style.perspective = INTERACTIVE_PERSPECTIVE + "px";
     wrapper.style.transformStyle = "preserve-3d";
   }
@@ -185,9 +227,6 @@
     var size = resolveAvatarSize(img);
     var wrapper = document.createElement("span");
     wrapper.className = (img.className || "") + " facehash-inline-avatar";
-    if (withHover) {
-      wrapper.classList.add("facehash-inline-hover");
-    }
     wrapper.style.width = size.width + "px";
     wrapper.style.height = size.height + "px";
     wrapper.setAttribute("aria-hidden", "true");
@@ -201,7 +240,7 @@
     img.setAttribute("aria-hidden", "true");
 
     var src = img.currentSrc || img.src || "";
-    applyInteractiveTilt(wrapper, src, withHover);
+    applyInteractiveTilt(wrapper, svg, src, withHover);
 
     return wrapper;
   }

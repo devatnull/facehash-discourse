@@ -63,7 +63,6 @@ module ::FacehashDiscourse
       show_initial:,
       colors:,
       shape: :round,
-      intensity_3d: :dramatic,
       enable_blink: false,
       blink_interval_seconds: 8,
       blink_duration_ms: 140,
@@ -124,7 +123,8 @@ module ::FacehashDiscourse
 
       blink_interval = blink_interval_seconds_for_avatar
 
-      svg = +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar">)
+      svg =
+        +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar" data-facehash="">)
       svg << blink_style_markup(blink_animation_id, blink_interval) if @enable_blink
 
       if @variant == :gradient
@@ -143,21 +143,30 @@ module ::FacehashDiscourse
       svg << %(<defs>#{defs.join}</defs>) if defs.any?
       svg << %(<g#{%Q( clip-path="url(##{clip_id})") if @shape != :square}>)
 
+      svg << %(<g data-facehash-bg="">)
       svg << %(<rect width="100%" height="100%" fill="#{base_color}" />)
-      svg << %(<rect width="100%" height="100%" fill="url(##{gradient_id})" />) if @variant == :gradient
+      if @variant == :gradient
+        svg << %(<rect width="100%" height="100%" fill="url(##{gradient_id})" data-facehash-gradient="" />)
+      end
+      svg << %(</g>)
+
+      svg << %(<g data-facehash-face="" data-facehash-rotation-x="#{computed[:rotation][:x]}" data-facehash-rotation-y="#{computed[:rotation][:y]}">)
 
       if @enable_blink
-        svg << %(<g class="#{blink_animation_id}" style="animation-duration:#{format_float(blink_interval)}s;animation-delay:-#{format_float(blink_delay_seconds(blink_interval))}s;">)
+        svg << %(<g data-facehash-eyes="" class="#{blink_animation_id}" style="animation-duration:#{format_float(blink_interval)}s;animation-delay:-#{format_float(blink_delay_seconds(blink_interval))}s;">)
+      else
+        svg << %(<g data-facehash-eyes="">)
       end
       svg << %(<svg x="#{format_float(face_x)}" y="#{format_float(face_y)}" width="#{format_float(face_width)}" height="#{format_float(face_height)}" viewBox="#{face_data[:view_box]}" fill="none" aria-hidden="true">)
       svg << path_markup
       svg << %(</svg>)
-      svg << %(</g>) if @enable_blink
+      svg << %(</g>)
 
       if @show_initial
-        svg << %(<text x="50%" y="#{format_float(text_y)}" text-anchor="middle" dominant-baseline="middle" font-family="#{CGI.escapeHTML(@font_family)}" font-weight="#{CGI.escapeHTML(@font_weight)}" font-size="#{format_float(font_size)}" fill="#{foreground_color}">#{initial}</text>)
+        svg << %(<text data-facehash-initial="" x="50%" y="#{format_float(text_y)}" text-anchor="middle" dominant-baseline="middle" font-family="#{CGI.escapeHTML(@font_family)}" font-weight="#{CGI.escapeHTML(@font_weight)}" font-size="#{format_float(font_size)}" fill="#{foreground_color}">#{initial}</text>)
       end
 
+      svg << %(</g>)
       svg << %(</g>)
       svg << %(</svg>)
       svg

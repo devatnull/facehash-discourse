@@ -75,10 +75,6 @@ module ::FacehashDiscourse
       ALLOWED_SHAPES.include?(candidate) ? candidate.to_sym : :round
     end
 
-    def intensity_3d
-      :none
-    end
-
     def blink_interval_seconds
       value = SiteSetting.facehash_avatars_blink_interval_seconds.to_i
       value.clamp(MIN_BLINK_INTERVAL_SECONDS, MAX_BLINK_INTERVAL_SECONDS)
