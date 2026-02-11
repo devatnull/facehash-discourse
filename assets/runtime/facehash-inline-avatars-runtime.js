@@ -187,7 +187,7 @@
     return svg.querySelector("[data-facehash-face]") || svg;
   }
 
-  function applyInteractiveTilt(wrapper, svg, src, withHover) {
+  function applyInteractiveTilt(wrapper, svg, src, withHover, size) {
     if (!withHover) {
       return;
     }
@@ -221,8 +221,13 @@
 
     wrapper.classList.add("facehash-inline-hover");
     target.classList.add("facehash-inline-interactive-face");
-    var rect = wrapper.getBoundingClientRect();
-    var maxDim = Math.max(rect.width || 0, rect.height || 0);
+    var knownWidth = size && Number.isFinite(size.width) ? size.width : 0;
+    var knownHeight = size && Number.isFinite(size.height) ? size.height : 0;
+    var maxDim = Math.max(knownWidth, knownHeight);
+    if (maxDim <= 0) {
+      var rect = wrapper.getBoundingClientRect();
+      maxDim = Math.max(rect.width || 0, rect.height || 0);
+    }
     var isSmallAvatar = maxDim > 0 && maxDim <= SMALL_AVATAR_THRESHOLD;
     var rotateRange = isSmallAvatar ? INTERACTIVE_ROTATE_RANGE_SMALL : INTERACTIVE_ROTATE_RANGE;
     var translateZ = isSmallAvatar ? INTERACTIVE_TRANSLATE_Z_SMALL : INTERACTIVE_TRANSLATE_Z;
@@ -265,7 +270,7 @@
     img.setAttribute("aria-hidden", "true");
 
     var src = img.currentSrc || img.src || "";
-    applyInteractiveTilt(wrapper, svg, src, withHover);
+    applyInteractiveTilt(wrapper, svg, src, withHover, size);
 
     return wrapper;
   }

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.10] - 2026-02-11
+
+### Fixed
+
+- Corrected small-avatar safety path detection by using resolved avatar size during inline wrapper build.
+- 24px poster avatars now correctly receive reduced motion depth (`translateZ: 0`) instead of full depth.
+
 ## [0.5.9] - 2026-02-11
 
 ### Fixed
