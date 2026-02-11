@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ::FacehashDiscourse
-  PLUGIN_VERSION = "0.5.8"
+  PLUGIN_VERSION = "0.5.9"
 end

@@ -3,6 +3,7 @@
   display: inline-block;
   line-height: 0;
   vertical-align: middle;
+  overflow: hidden;
 }
 
 .facehash-inline-avatar > .facehash-inline-svg {
@@ -24,8 +25,8 @@
   transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
   transform-box: fill-box;
   transform-origin: center center;
-  transform-style: preserve-3d;
   will-change: transform;
+  backface-visibility: hidden;
   transform:
     rotateX(var(--fh-rx, 0deg))
     rotateY(var(--fh-ry, 0deg))

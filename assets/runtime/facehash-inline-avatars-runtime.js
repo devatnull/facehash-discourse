@@ -21,8 +21,11 @@
     { x: 1, y: -1 },
   ];
   var INTERACTIVE_ROTATE_RANGE = 12;
+  var INTERACTIVE_ROTATE_RANGE_SMALL = 8;
   var INTERACTIVE_PERSPECTIVE = 520;
   var INTERACTIVE_TRANSLATE_Z = 6;
+  var INTERACTIVE_TRANSLATE_Z_SMALL = 0;
+  var SMALL_AVATAR_THRESHOLD = 28;
 
   function readSiteSettings() {
     return (window.Discourse && window.Discourse.SiteSettings) || window.siteSettings || {};
@@ -218,11 +221,16 @@
 
     wrapper.classList.add("facehash-inline-hover");
     target.classList.add("facehash-inline-interactive-face");
-    target.style.setProperty("--fh-rx", position.x * INTERACTIVE_ROTATE_RANGE + "deg");
-    target.style.setProperty("--fh-ry", position.y * INTERACTIVE_ROTATE_RANGE + "deg");
-    target.style.setProperty("--fh-tz", INTERACTIVE_TRANSLATE_Z + "px");
+    var rect = wrapper.getBoundingClientRect();
+    var maxDim = Math.max(rect.width || 0, rect.height || 0);
+    var isSmallAvatar = maxDim > 0 && maxDim <= SMALL_AVATAR_THRESHOLD;
+    var rotateRange = isSmallAvatar ? INTERACTIVE_ROTATE_RANGE_SMALL : INTERACTIVE_ROTATE_RANGE;
+    var translateZ = isSmallAvatar ? INTERACTIVE_TRANSLATE_Z_SMALL : INTERACTIVE_TRANSLATE_Z;
+
+    target.style.setProperty("--fh-rx", position.x * rotateRange + "deg");
+    target.style.setProperty("--fh-ry", position.y * rotateRange + "deg");
+    target.style.setProperty("--fh-tz", translateZ + "px");
     wrapper.style.perspective = INTERACTIVE_PERSPECTIVE + "px";
-    wrapper.style.transformStyle = "preserve-3d";
   }
 
   function parseSvg(text) {

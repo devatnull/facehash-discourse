@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.9] - 2026-02-11
+
+### Fixed
+
+- Reduced Safari/WebKit square-plane artifacts around small (e.g. 24px) inline avatars by:
+  - using `translateZ(0)` for small avatars in interactive mode
+  - lowering rotation range for small avatars
+  - removing SVG `preserve-3d` transform style on the face layer
+  - enabling overflow clipping and backface hiding on inline avatar wrappers
+
 ## [0.5.8] - 2026-02-11
 
 ### Added
