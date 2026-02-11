@@ -15,7 +15,7 @@ require_relative "lib/facehash_discourse/avatar_renderer"
 
 module ::FacehashDiscourse
   RUNTIME_INLINE_AVATAR_SCRIPT =
-    File.read(File.expand_path("assets/javascripts/facehash-inline-avatars-runtime.js", __dir__)).freeze
+    File.read(File.expand_path("assets/runtime/facehash-inline-avatars-runtime.js", __dir__)).freeze
 end
 
 register_html_builder("server:before-head-close") do |controller|
