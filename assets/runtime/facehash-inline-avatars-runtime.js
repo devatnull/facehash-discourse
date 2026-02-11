@@ -9,6 +9,20 @@
   var PROCESSED_ATTR = "data-facehash-inline-state";
   var SVG_CACHE = new Map();
   var INFLIGHT = new Map();
+  var INTERACTIVE_SPHERE_POSITIONS = [
+    { x: -1, y: 1 },
+    { x: 1, y: 1 },
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: -1 },
+    { x: -1, y: -1 },
+    { x: 1, y: -1 },
+  ];
+  var INTERACTIVE_ROTATE_RANGE = 12;
+  var INTERACTIVE_PERSPECTIVE = 520;
+  var INTERACTIVE_TRANSLATE_Z = 6;
 
   function readSiteSettings() {
     return (window.Discourse && window.Discourse.SiteSettings) || window.siteSettings || {};
@@ -100,6 +114,48 @@
     return request;
   }
 
+  function stringHash(input) {
+    var hash = 0;
+    for (var i = 0; i < input.length; i += 1) {
+      hash = ((hash << 5) - hash + input.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function avatarSeedFromSrc(src) {
+    var match = src.match(/\/facehash_avatar\/([^/]+)\//);
+    if (!match || !match[1]) {
+      return "";
+    }
+
+    try {
+      return decodeURIComponent(match[1]);
+    } catch (_error) {
+      return match[1];
+    }
+  }
+
+  function applyInteractiveTilt(wrapper, src, withHover) {
+    if (!withHover) {
+      return;
+    }
+
+    var seed = avatarSeedFromSrc(src);
+    if (!seed) {
+      return;
+    }
+
+    var hash = stringHash(seed);
+    var position =
+      INTERACTIVE_SPHERE_POSITIONS[hash % INTERACTIVE_SPHERE_POSITIONS.length] || { x: 0, y: 0 };
+
+    wrapper.style.setProperty("--fh-rx", position.x * INTERACTIVE_ROTATE_RANGE + "deg");
+    wrapper.style.setProperty("--fh-ry", position.y * INTERACTIVE_ROTATE_RANGE + "deg");
+    wrapper.style.setProperty("--fh-tz", INTERACTIVE_TRANSLATE_Z + "px");
+    wrapper.style.perspective = INTERACTIVE_PERSPECTIVE + "px";
+    wrapper.style.transformStyle = "preserve-3d";
+  }
+
   function parseSvg(text) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(text, "image/svg+xml");
@@ -133,6 +189,9 @@
 
     img.classList.add("facehash-inline-hidden");
     img.setAttribute("aria-hidden", "true");
+
+    var src = img.currentSrc || img.src || "";
+    applyInteractiveTilt(wrapper, src, withHover);
 
     return wrapper;
   }
