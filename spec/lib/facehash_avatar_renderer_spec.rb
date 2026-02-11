@@ -69,4 +69,68 @@ describe FacehashDiscourse::AvatarRenderer do
     expect(renderer.to_svg).not_to include("feDropShadow")
     expect(renderer.to_svg).not_to include("facehash-highlight-")
   end
+
+  it "supports blink animation markup" do
+    renderer =
+      described_class.new(
+        name: "alice",
+        size: 64,
+        variant: :solid,
+        show_initial: true,
+        colors: colors,
+        enable_blink: true,
+        blink_interval_seconds: 5,
+        blink_duration_ms: 140,
+      )
+
+    svg = renderer.to_svg
+    expect(svg).to include("@keyframes facehash-blink-")
+    expect(svg).to include("animation-duration:5s")
+  end
+
+  it "supports custom font family and weight" do
+    renderer =
+      described_class.new(
+        name: "alice",
+        size: 64,
+        variant: :solid,
+        show_initial: true,
+        colors: colors,
+        font_family: "Inter, sans-serif",
+        font_weight: "600",
+      )
+
+    svg = renderer.to_svg
+    expect(svg).to include('font-family="Inter, sans-serif"')
+    expect(svg).to include('font-weight="600"')
+  end
+
+  it "uses white foreground when auto contrast is enabled on dark backgrounds" do
+    renderer =
+      described_class.new(
+        name: "alice",
+        size: 64,
+        variant: :solid,
+        show_initial: true,
+        colors: ["#000000"],
+      )
+
+    svg = renderer.to_svg
+    expect(svg).to include('fill="#ffffff"')
+  end
+
+  it "uses configured manual foreground color when auto contrast is disabled" do
+    renderer =
+      described_class.new(
+        name: "alice",
+        size: 64,
+        variant: :solid,
+        show_initial: true,
+        colors: ["#ffffff"],
+        auto_foreground_contrast: false,
+        foreground_color: "#ff0000",
+      )
+
+    expect(renderer.to_svg).to include('fill="#ff0000"')
+  end
 end

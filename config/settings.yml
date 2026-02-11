@@ -8,11 +8,34 @@ plugins:
   facehash_avatars_show_initial:
     default: true
     client: false
+  facehash_avatars_enable_blink:
+    default: false
+    client: false
+  facehash_avatars_blink_interval_seconds:
+    type: integer
+    default: 6
+    client: false
+  facehash_avatars_blink_duration_ms:
+    type: integer
+    default: 180
+    client: false
   facehash_avatars_shape:
     default: "round"
     client: false
   facehash_avatars_intensity_3d:
     default: "dramatic"
+    client: false
+  facehash_avatars_font_family:
+    default: "monospace"
+    client: false
+  facehash_avatars_font_weight:
+    default: "700"
+    client: false
+  facehash_avatars_auto_foreground_contrast:
+    default: true
+    client: false
+  facehash_avatars_foreground_color:
+    default: "#000000"
     client: false
   facehash_avatars_hash_source:
     default: "username"

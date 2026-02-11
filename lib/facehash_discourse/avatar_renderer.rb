@@ -8,6 +8,10 @@ module ::FacehashDiscourse
     FACE_TYPES = %i[round cross line curved].freeze
     ALLOWED_SHAPES = %i[square squircle round].freeze
     ALLOWED_INTENSITIES = %i[none subtle medium dramatic].freeze
+    MIN_BLINK_INTERVAL_SECONDS = 2
+    MAX_BLINK_INTERVAL_SECONDS = 30
+    MIN_BLINK_DURATION_MS = 80
+    MAX_BLINK_DURATION_MS = 2000
     INTENSITY_STOPS = {
       none: { highlight: 0.0, shade: 0.0, shadow: 0.0 },
       subtle: { highlight: 0.08, shade: 0.05, shadow: 0.12 },
@@ -59,7 +63,22 @@ module ::FacehashDiscourse
       },
     }.freeze
 
-    def initialize(name:, size:, variant:, show_initial:, colors:, shape: :round, intensity_3d: :dramatic)
+    def initialize(
+      name:,
+      size:,
+      variant:,
+      show_initial:,
+      colors:,
+      shape: :round,
+      intensity_3d: :dramatic,
+      enable_blink: false,
+      blink_interval_seconds: 6,
+      blink_duration_ms: 180,
+      font_family: "monospace",
+      font_weight: "700",
+      foreground_color: "#000000",
+      auto_foreground_contrast: true
+    )
       @name = name.to_s
       @size = size.to_i
       @variant = variant.to_sym
@@ -67,6 +86,16 @@ module ::FacehashDiscourse
       @colors = colors
       @shape = sanitize_shape(shape)
       @intensity_3d = sanitize_intensity(intensity_3d)
+      @enable_blink = !!enable_blink
+      @blink_interval_seconds =
+        sanitize_int(blink_interval_seconds, MIN_BLINK_INTERVAL_SECONDS, MAX_BLINK_INTERVAL_SECONDS)
+      @blink_duration_ms =
+        sanitize_int(blink_duration_ms, MIN_BLINK_DURATION_MS, MAX_BLINK_DURATION_MS)
+      @font_family = font_family.to_s.strip
+      @font_family = "monospace" if @font_family.empty?
+      @font_weight = sanitize_font_weight(font_weight)
+      @foreground_color = foreground_color.to_s
+      @auto_foreground_contrast = !!auto_foreground_contrast
     end
 
     def to_svg
@@ -96,16 +125,19 @@ module ::FacehashDiscourse
       shadow_gradient_id = "facehash-shadow-#{id_seed}"
       clip_id = "facehash-clip-#{id_seed}"
       shadow_id = "facehash-drop-shadow-#{id_seed}"
+      blink_animation_id = "facehash-blink-#{id_seed}"
       initial = CGI.escapeHTML(computed[:initial])
+      base_color = computed[:color]
+      foreground_color = computed_foreground_color(base_color)
 
-      path_markup = face_data[:paths].map { |path| %(<path d="#{path}" fill="#000000" />) }.join
+      path_markup = face_data[:paths].map { |path| %(<path d="#{path}" fill="#{foreground_color}" />) }.join
       defs = []
       highlight_opacity = intensity_stops[:highlight]
       shade_opacity = intensity_stops[:shade]
       face_shadow_opacity = intensity_stops[:shadow]
-      base_color = computed[:color]
 
       svg = +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar">)
+      svg << blink_style_markup(blink_animation_id) if @enable_blink
 
       if @variant == :gradient
         defs << <<~GRADIENT.strip
@@ -164,12 +196,16 @@ module ::FacehashDiscourse
       end
 
       shadow_attr = face_shadow_opacity.positive? ? %Q( filter="url(##{shadow_id})") : ""
+      if @enable_blink
+        svg << %(<g class="#{blink_animation_id}" style="animation-duration:#{format_float(@blink_interval_seconds)}s;animation-delay:-#{format_float(blink_delay_seconds)}s;">)
+      end
       svg << %(<svg x="#{format_float(face_x)}" y="#{format_float(face_y)}" width="#{format_float(face_width)}" height="#{format_float(face_height)}" viewBox="#{face_data[:view_box]}" fill="none" aria-hidden="true"#{shadow_attr}>)
       svg << path_markup
       svg << %(</svg>)
+      svg << %(</g>) if @enable_blink
 
       if @show_initial
-        svg << %(<text x="50%" y="#{format_float(text_y)}" text-anchor="middle" dominant-baseline="middle" font-family="monospace" font-weight="700" font-size="#{format_float(font_size)}" fill="#000000">#{initial}</text>)
+        svg << %(<text x="50%" y="#{format_float(text_y)}" text-anchor="middle" dominant-baseline="middle" font-family="#{CGI.escapeHTML(@font_family)}" font-weight="#{CGI.escapeHTML(@font_weight)}" font-size="#{format_float(font_size)}" fill="#{foreground_color}">#{initial}</text>)
       end
 
       svg << %(</g>)
@@ -292,6 +328,70 @@ module ::FacehashDiscourse
       [r, g, b]
     rescue StandardError
       nil
+    end
+
+    def computed_foreground_color(base_color)
+      return normalized_hex(@foreground_color) || "#000000" unless @auto_foreground_contrast
+
+      rgb = parse_hex(base_color)
+      return "#000000" if rgb.nil?
+
+      yiq = ((rgb[0] * 299) + (rgb[1] * 587) + (rgb[2] * 114)) / 1000.0
+      yiq >= 140 ? "#000000" : "#ffffff"
+    end
+
+    def normalized_hex(hex)
+      rgb = parse_hex(hex)
+      return nil if rgb.nil?
+
+      format("#%02x%02x%02x", rgb[0], rgb[1], rgb[2])
+    end
+
+    def blink_style_markup(blink_animation_id)
+      close_ratio = [@blink_duration_ms.to_f / (@blink_interval_seconds * 1000.0), 0.18].min
+      close_start = [0.48 - (close_ratio / 2.0), 0.35].max
+      close_end = [close_start + close_ratio, 0.62].min
+
+      <<~STYLE.strip
+        <style>
+          @keyframes #{blink_animation_id} {
+            0%, #{percent(close_start)}%, 100% { transform: scaleY(1); }
+            #{percent((close_start + close_end) / 2.0)}% { transform: scaleY(0.08); }
+            #{percent(close_end)}% { transform: scaleY(1); }
+          }
+          .#{blink_animation_id} {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation-name: #{blink_animation_id};
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+          }
+        </style>
+      STYLE
+    end
+
+    def blink_delay_seconds
+      return 0.0 if @blink_interval_seconds <= 0
+
+      (string_hash(@name) % 1000) / 1000.0 * @blink_interval_seconds
+    end
+
+    def percent(value)
+      format_float(value * 100)
+    end
+
+    def sanitize_int(value, min, max)
+      value.to_i.clamp(min, max)
+    end
+
+    def sanitize_font_weight(font_weight)
+      candidate = font_weight.to_s.strip
+      return "700" if candidate.empty?
+      keyword = candidate.downcase
+      return keyword if %w[normal bold bolder lighter].include?(keyword)
+      return candidate if candidate.match?(/\A[1-9]00\z/)
+
+      "700"
     end
   end
 end

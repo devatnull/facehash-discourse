@@ -14,8 +14,15 @@ describe FacehashDiscourse::AvatarsController do
     SiteSetting.facehash_avatars_enabled = true
     SiteSetting.facehash_avatars_gradient_overlay = true
     SiteSetting.facehash_avatars_show_initial = true
+    SiteSetting.facehash_avatars_enable_blink = false
+    SiteSetting.facehash_avatars_blink_interval_seconds = 6
+    SiteSetting.facehash_avatars_blink_duration_ms = 180
     SiteSetting.facehash_avatars_shape = "round"
     SiteSetting.facehash_avatars_intensity_3d = "dramatic"
+    SiteSetting.facehash_avatars_font_family = "monospace"
+    SiteSetting.facehash_avatars_font_weight = "700"
+    SiteSetting.facehash_avatars_auto_foreground_contrast = true
+    SiteSetting.facehash_avatars_foreground_color = "#000000"
     SiteSetting.facehash_avatars_hash_source = "username"
   end
 
@@ -55,6 +62,27 @@ describe FacehashDiscourse::AvatarsController do
     expect(response.status).to eq(200)
     expect(response.body).to include("<clipPath")
     expect(response.body).to include("<circle")
+  end
+
+  it "renders blink animation style when enabled" do
+    SiteSetting.facehash_avatars_enable_blink = true
+    SiteSetting.facehash_avatars_blink_interval_seconds = 5
+
+    get avatar_path
+
+    expect(response.status).to eq(200)
+    expect(response.body).to include("@keyframes facehash-blink-")
+    expect(response.body).to include("animation-duration:5s")
+  end
+
+  it "uses custom manual foreground color when auto contrast is disabled" do
+    SiteSetting.facehash_avatars_auto_foreground_contrast = false
+    SiteSetting.facehash_avatars_foreground_color = "#ff0000"
+
+    get avatar_path
+
+    expect(response.status).to eq(200)
+    expect(response.body).to include('fill="#ff0000"')
   end
 
   it "returns fallback image when disabled" do

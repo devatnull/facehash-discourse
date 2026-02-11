@@ -41,8 +41,15 @@ module ::FacehashDiscourse
           size: size,
           variant: ::FacehashDiscourse::Config.variant,
           show_initial: ::FacehashDiscourse::Config.show_initial?,
+          enable_blink: ::FacehashDiscourse::Config.enable_blink?,
+          blink_interval_seconds: ::FacehashDiscourse::Config.blink_interval_seconds,
+          blink_duration_ms: ::FacehashDiscourse::Config.blink_duration_ms,
           shape: ::FacehashDiscourse::Config.shape,
           intensity_3d: ::FacehashDiscourse::Config.intensity_3d,
+          font_family: ::FacehashDiscourse::Config.font_family,
+          font_weight: ::FacehashDiscourse::Config.font_weight,
+          foreground_color: ::FacehashDiscourse::Config.foreground_color,
+          auto_foreground_contrast: ::FacehashDiscourse::Config.auto_foreground_contrast?,
           colors: ::FacehashDiscourse::Config.colors,
         ).to_svg
 

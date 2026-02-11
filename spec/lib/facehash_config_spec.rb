@@ -51,6 +51,42 @@ describe FacehashDiscourse::Config do
     expect(described_class.intensity_3d).to eq(:dramatic)
   end
 
+  it "clamps blink interval to safe bounds" do
+    SiteSetting.facehash_avatars_blink_interval_seconds = 500
+
+    expect(described_class.blink_interval_seconds).to eq(described_class::MAX_BLINK_INTERVAL_SECONDS)
+  end
+
+  it "clamps blink duration to safe bounds" do
+    SiteSetting.facehash_avatars_blink_duration_ms = 1
+
+    expect(described_class.blink_duration_ms).to eq(described_class::MIN_BLINK_DURATION_MS)
+  end
+
+  it "sanitizes invalid font family" do
+    SiteSetting.facehash_avatars_font_family = "bad; value"
+
+    expect(described_class.font_family).to eq("monospace")
+  end
+
+  it "supports numeric font weight values" do
+    SiteSetting.facehash_avatars_font_weight = "600"
+
+    expect(described_class.font_weight).to eq("600")
+  end
+
+  it "falls back to default font weight when invalid" do
+    SiteSetting.facehash_avatars_font_weight = "heavy"
+
+    expect(described_class.font_weight).to eq("700")
+  end
+
+  it "falls back to default foreground color when invalid" do
+    SiteSetting.facehash_avatars_foreground_color = "red"
+
+    expect(described_class.foreground_color).to eq("#000000")
+  end
+
   it "deduplicates and caps palette colors for safety" do
     color_list = (1..50).map { |i| format("#%06x", i) }
     SiteSetting.facehash_avatars_palette = ([color_list.first] + color_list).join("|")
