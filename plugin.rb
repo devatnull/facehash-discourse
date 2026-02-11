@@ -2,17 +2,32 @@
 
 # name: discourse-facehash-avatars
 # about: Replaces Discourse default avatars with deterministic Facehash avatars for users without uploaded profile pictures.
-# version: 0.5.0
+# version: 0.5.1
 # authors: devatnull
 # url: https://github.com/devatnull/facehash-discourse
 
 enabled_site_setting :facehash_avatars_enabled
 register_asset "stylesheets/common/facehash-inline-avatars.scss"
-register_javascript File.read(File.expand_path("assets/javascripts/facehash-inline-avatars-runtime.js", __dir__))
 
 require_relative "lib/facehash_discourse/version"
 require_relative "lib/facehash_discourse/config"
 require_relative "lib/facehash_discourse/avatar_renderer"
+
+module ::FacehashDiscourse
+  RUNTIME_INLINE_AVATAR_SCRIPT =
+    File.read(File.expand_path("assets/javascripts/facehash-inline-avatars-runtime.js", __dir__)).freeze
+end
+
+register_html_builder("server:before-head-close") do |controller|
+  next "" unless SiteSetting.facehash_avatars_enabled
+  next "" unless SiteSetting.facehash_avatars_inline_render
+
+  <<~HTML
+    <script nonce='#{controller.helpers.csp_nonce_placeholder}'>
+    #{::FacehashDiscourse::RUNTIME_INLINE_AVATAR_SCRIPT}
+    </script>
+  HTML
+end
 
 after_initialize do
   require_dependency "application_controller"
