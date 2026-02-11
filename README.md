@@ -67,6 +67,8 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_enabled` | `true` | Enable Facehash avatars for default avatar fallback. |
 | `facehash_avatars_gradient_overlay` | `true` | Use gradient style (off = solid style). |
 | `facehash_avatars_show_initial` | `true` | Show initial character on avatar. |
+| `facehash_avatars_shape` | `round` | Avatar mask shape: `round`, `squircle`, or `square`. |
+| `facehash_avatars_intensity_3d` | `dramatic` | Shading depth: `none`, `subtle`, `medium`, or `dramatic`. |
 | `facehash_avatars_hash_source` | `username` | Seed source: `username`, `name`, `name_or_username`. |
 | `facehash_avatars_palette` | `#ec4899|#f59e0b|#3b82f6|#f97316|#10b981` | Color palette (pipe/comma/space/newline separated hex values). |
 
@@ -109,6 +111,8 @@ Docker Compose note:
 
 - Replaces only default fallback avatars.
 - Does not modify uploaded user profile pictures.
+- Avatars stay deterministic by design (same seed always returns the same avatar).
+- `facehash_avatars_palette` is a deterministic color pool. Each user maps to a stable color from that pool.
 
 ## Testing
 

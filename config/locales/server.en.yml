@@ -3,5 +3,7 @@ en:
     facehash_avatars_enabled: "Enable Facehash avatars as the default avatar for users without an uploaded profile picture"
     facehash_avatars_gradient_overlay: "Use Facehash gradient background style (disable for solid backgrounds)"
     facehash_avatars_show_initial: "Render user initial on top of Facehash avatars"
+    facehash_avatars_shape: "Avatar mask shape: round, squircle, or square"
+    facehash_avatars_intensity_3d: "Face shading intensity: none, subtle, medium, or dramatic"
     facehash_avatars_hash_source: "Seed source for deterministic avatar generation: username, name, or name_or_username"
     facehash_avatars_palette: "Pipe, comma, space, or newline separated list of hex colors used by Facehash avatars"

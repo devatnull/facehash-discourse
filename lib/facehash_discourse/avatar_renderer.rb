@@ -6,6 +6,14 @@ require "digest"
 module ::FacehashDiscourse
   class AvatarRenderer
     FACE_TYPES = %i[round cross line curved].freeze
+    ALLOWED_SHAPES = %i[square squircle round].freeze
+    ALLOWED_INTENSITIES = %i[none subtle medium dramatic].freeze
+    INTENSITY_STOPS = {
+      none: { highlight: 0.0, shade: 0.0, shadow: 0.0 },
+      subtle: { highlight: 0.08, shade: 0.05, shadow: 0.12 },
+      medium: { highlight: 0.13, shade: 0.09, shadow: 0.2 },
+      dramatic: { highlight: 0.2, shade: 0.14, shadow: 0.32 },
+    }.freeze
     SPHERE_POSITIONS = [
       { x: -1, y: 1 },
       { x: 1, y: 1 },
@@ -51,12 +59,14 @@ module ::FacehashDiscourse
       },
     }.freeze
 
-    def initialize(name:, size:, variant:, show_initial:, colors:)
+    def initialize(name:, size:, variant:, show_initial:, colors:, shape: :round, intensity_3d: :dramatic)
       @name = name.to_s
       @size = size.to_i
       @variant = variant.to_sym
       @show_initial = !!show_initial
       @colors = colors
+      @shape = sanitize_shape(shape)
+      @intensity_3d = sanitize_intensity(intensity_3d)
     end
 
     def to_svg
@@ -80,20 +90,81 @@ module ::FacehashDiscourse
       font_size = @size * 0.26
       text_y = (@size * 0.76) + offset_y
 
-      gradient_id = "facehash-gradient-#{Digest::MD5.hexdigest([@name, @size].join("|"))[0, 10]}"
+      id_seed = Digest::MD5.hexdigest([@name, @size, @variant, @shape, @intensity_3d].join("|"))[0, 10]
+      gradient_id = "facehash-gradient-#{id_seed}"
+      highlight_gradient_id = "facehash-highlight-#{id_seed}"
+      shadow_gradient_id = "facehash-shadow-#{id_seed}"
+      clip_id = "facehash-clip-#{id_seed}"
+      shadow_id = "facehash-drop-shadow-#{id_seed}"
       initial = CGI.escapeHTML(computed[:initial])
 
       path_markup = face_data[:paths].map { |path| %(<path d="#{path}" fill="#000000" />) }.join
+      defs = []
+      highlight_opacity = intensity_stops[:highlight]
+      shade_opacity = intensity_stops[:shade]
+      face_shadow_opacity = intensity_stops[:shadow]
+      base_color = computed[:color]
 
       svg = +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar">)
-      svg << %(<rect width="100%" height="100%" fill="#{computed[:color]}" />)
 
       if @variant == :gradient
-        svg << %(<defs><radialGradient id="#{gradient_id}" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.15" /><stop offset="60%" stop-color="#ffffff" stop-opacity="0" /></radialGradient></defs>)
-        svg << %(<rect width="100%" height="100%" fill="url(##{gradient_id})" />)
+        defs << <<~GRADIENT.strip
+          <linearGradient id="#{gradient_id}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#{lighten(base_color, 0.18)}" />
+            <stop offset="100%" stop-color="#{darken(base_color, 0.16)}" />
+          </linearGradient>
+        GRADIENT
       end
 
-      svg << %(<svg x="#{format_float(face_x)}" y="#{format_float(face_y)}" width="#{format_float(face_width)}" height="#{format_float(face_height)}" viewBox="#{face_data[:view_box]}" fill="none" aria-hidden="true">)
+      if highlight_opacity.positive?
+        defs << <<~HIGHLIGHT.strip
+          <radialGradient id="#{highlight_gradient_id}" cx="30%" cy="22%" r="72%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="#{format_float(highlight_opacity)}" />
+            <stop offset="62%" stop-color="#ffffff" stop-opacity="0" />
+          </radialGradient>
+        HIGHLIGHT
+      end
+
+      if shade_opacity.positive?
+        defs << <<~SHADE.strip
+          <linearGradient id="#{shadow_gradient_id}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="45%" stop-color="#000000" stop-opacity="0" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="#{format_float(shade_opacity)}" />
+          </linearGradient>
+        SHADE
+      end
+
+      if @shape != :square
+        defs << shape_clip_markup(clip_id)
+      end
+
+      if face_shadow_opacity.positive?
+        defs << <<~FILTER.strip
+          <filter id="#{shadow_id}" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="#{format_float(@size * 0.015)}" stdDeviation="#{format_float(@size * 0.012)}" flood-color="#000000" flood-opacity="#{format_float(face_shadow_opacity)}" />
+          </filter>
+        FILTER
+      end
+
+      svg << %(<defs>#{defs.join}</defs>) if defs.any?
+      svg << %(<g#{%Q( clip-path="url(##{clip_id})") if @shape != :square}>)
+
+      if @variant == :gradient
+        svg << %(<rect width="100%" height="100%" fill="url(##{gradient_id})" />)
+      else
+        svg << %(<rect width="100%" height="100%" fill="#{base_color}" />)
+      end
+
+      if highlight_opacity.positive?
+        svg << %(<rect width="100%" height="100%" fill="url(##{highlight_gradient_id})" />)
+      end
+
+      if shade_opacity.positive?
+        svg << %(<rect width="100%" height="100%" fill="url(##{shadow_gradient_id})" />)
+      end
+
+      shadow_attr = face_shadow_opacity.positive? ? %Q( filter="url(##{shadow_id})") : ""
+      svg << %(<svg x="#{format_float(face_x)}" y="#{format_float(face_y)}" width="#{format_float(face_width)}" height="#{format_float(face_height)}" viewBox="#{face_data[:view_box]}" fill="none" aria-hidden="true"#{shadow_attr}>)
       svg << path_markup
       svg << %(</svg>)
 
@@ -101,6 +172,7 @@ module ::FacehashDiscourse
         svg << %(<text x="50%" y="#{format_float(text_y)}" text-anchor="middle" dominant-baseline="middle" font-family="monospace" font-weight="700" font-size="#{format_float(font_size)}" fill="#000000">#{initial}</text>)
       end
 
+      svg << %(</g>)
       svg << %(</svg>)
       svg
     end
@@ -147,6 +219,79 @@ module ::FacehashDiscourse
 
     def format_float(value)
       value.round(3)
+    end
+
+    def intensity_stops
+      INTENSITY_STOPS.fetch(@intensity_3d, INTENSITY_STOPS[:dramatic])
+    end
+
+    def sanitize_shape(shape)
+      candidate = shape.to_sym
+      ALLOWED_SHAPES.include?(candidate) ? candidate : :round
+    rescue StandardError
+      :round
+    end
+
+    def sanitize_intensity(intensity_3d)
+      candidate = intensity_3d.to_sym
+      ALLOWED_INTENSITIES.include?(candidate) ? candidate : :dramatic
+    rescue StandardError
+      :dramatic
+    end
+
+    def shape_clip_markup(clip_id)
+      case @shape
+      when :round
+        radius = @size / 2.0
+        %(<clipPath id="#{clip_id}"><circle cx="#{format_float(radius)}" cy="#{format_float(radius)}" r="#{format_float(radius)}" /></clipPath>)
+      when :squircle
+        corner = @size * 0.28
+        %(<clipPath id="#{clip_id}"><rect width="#{@size}" height="#{@size}" rx="#{format_float(corner)}" ry="#{format_float(corner)}" /></clipPath>)
+      else
+        ""
+      end
+    end
+
+    def lighten(hex, amount)
+      blend(hex, "#ffffff", amount)
+    end
+
+    def darken(hex, amount)
+      blend(hex, "#000000", amount)
+    end
+
+    def blend(hex_from, hex_to, amount)
+      from = parse_hex(hex_from)
+      to = parse_hex(hex_to)
+      return hex_from unless from && to
+
+      ratio = amount.clamp(0.0, 1.0)
+      r = (from[0] + ((to[0] - from[0]) * ratio)).round
+      g = (from[1] + ((to[1] - from[1]) * ratio)).round
+      b = (from[2] + ((to[2] - from[2]) * ratio)).round
+
+      format("#%02x%02x%02x", r, g, b)
+    end
+
+    def parse_hex(hex)
+      normalized = hex.to_s.strip.sub("#", "")
+
+      case normalized.length
+      when 3
+        r = (normalized[0] * 2).to_i(16)
+        g = (normalized[1] * 2).to_i(16)
+        b = (normalized[2] * 2).to_i(16)
+      when 6
+        r = normalized[0..1].to_i(16)
+        g = normalized[2..3].to_i(16)
+        b = normalized[4..5].to_i(16)
+      else
+        return nil
+      end
+
+      [r, g, b]
+    rescue StandardError
+      nil
     end
   end
 end

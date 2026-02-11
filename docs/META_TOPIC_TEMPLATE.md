@@ -61,6 +61,8 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - `facehash_avatars_enabled`
 - `facehash_avatars_gradient_overlay`
 - `facehash_avatars_show_initial`
+- `facehash_avatars_shape` (`round`, `squircle`, `square`)
+- `facehash_avatars_intensity_3d` (`none`, `subtle`, `medium`, `dramatic`)
 - `facehash_avatars_hash_source` (`username`, `name`, `name_or_username`)
 - `facehash_avatars_palette`
 

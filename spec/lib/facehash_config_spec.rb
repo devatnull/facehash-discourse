@@ -27,6 +27,30 @@ describe FacehashDiscourse::Config do
     expect(described_class.hash_source).to eq(:username)
   end
 
+  it "supports a valid shape setting" do
+    SiteSetting.facehash_avatars_shape = "squircle"
+
+    expect(described_class.shape).to eq(:squircle)
+  end
+
+  it "falls back to round shape when invalid" do
+    SiteSetting.facehash_avatars_shape = "bad-shape"
+
+    expect(described_class.shape).to eq(:round)
+  end
+
+  it "supports a valid 3d intensity setting" do
+    SiteSetting.facehash_avatars_intensity_3d = "subtle"
+
+    expect(described_class.intensity_3d).to eq(:subtle)
+  end
+
+  it "falls back to dramatic 3d intensity when invalid" do
+    SiteSetting.facehash_avatars_intensity_3d = "bad-intensity"
+
+    expect(described_class.intensity_3d).to eq(:dramatic)
+  end
+
   it "deduplicates and caps palette colors for safety" do
     color_list = (1..50).map { |i| format("#%06x", i) }
     SiteSetting.facehash_avatars_palette = ([color_list.first] + color_list).join("|")

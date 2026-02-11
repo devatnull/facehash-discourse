@@ -14,6 +14,8 @@ describe FacehashDiscourse::AvatarsController do
     SiteSetting.facehash_avatars_enabled = true
     SiteSetting.facehash_avatars_gradient_overlay = true
     SiteSetting.facehash_avatars_show_initial = true
+    SiteSetting.facehash_avatars_shape = "round"
+    SiteSetting.facehash_avatars_intensity_3d = "dramatic"
     SiteSetting.facehash_avatars_hash_source = "username"
   end
 
@@ -36,6 +38,23 @@ describe FacehashDiscourse::AvatarsController do
     get avatar_path, headers: { "If-None-Match" => etag }
 
     expect(response.status).to eq(304)
+  end
+
+  it "changes render mode when gradient setting is disabled" do
+    SiteSetting.facehash_avatars_gradient_overlay = false
+
+    get avatar_path
+
+    expect(response.status).to eq(200)
+    expect(response.body).not_to include("facehash-gradient-")
+  end
+
+  it "renders round clipping by default" do
+    get avatar_path
+
+    expect(response.status).to eq(200)
+    expect(response.body).to include("<clipPath")
+    expect(response.body).to include("<circle")
   end
 
   it "returns fallback image when disabled" do

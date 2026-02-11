@@ -8,6 +8,12 @@ plugins:
   facehash_avatars_show_initial:
     default: true
     client: false
+  facehash_avatars_shape:
+    default: "round"
+    client: false
+  facehash_avatars_intensity_3d:
+    default: "dramatic"
+    client: false
   facehash_avatars_hash_source:
     default: "username"
     client: false

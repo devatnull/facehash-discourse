@@ -41,6 +41,8 @@ module ::FacehashDiscourse
           size: size,
           variant: ::FacehashDiscourse::Config.variant,
           show_initial: ::FacehashDiscourse::Config.show_initial?,
+          shape: ::FacehashDiscourse::Config.shape,
+          intensity_3d: ::FacehashDiscourse::Config.intensity_3d,
           colors: ::FacehashDiscourse::Config.colors,
         ).to_svg
 

@@ -7,6 +7,8 @@ module ::FacehashDiscourse
     DEFAULT_COLORS = %w[#ec4899 #f59e0b #3b82f6 #f97316 #10b981].freeze
     COLOR_REGEX = /\A#[0-9A-Fa-f]{3,8}\z/
     ALLOWED_HASH_SOURCES = %w[username name name_or_username].freeze
+    ALLOWED_SHAPES = %w[square squircle round].freeze
+    ALLOWED_INTENSITY_3D = %w[none subtle medium dramatic].freeze
     MAX_COLORS = 32
 
     module_function
@@ -17,6 +19,8 @@ module ::FacehashDiscourse
         SiteSetting.facehash_avatars_gradient_overlay,
         SiteSetting.facehash_avatars_show_initial,
         hash_source,
+        shape,
+        intensity_3d,
         SiteSetting.facehash_avatars_palette,
       ].join("|")
 
@@ -47,6 +51,16 @@ module ::FacehashDiscourse
     def hash_source
       candidate = SiteSetting.facehash_avatars_hash_source.to_s.strip
       ALLOWED_HASH_SOURCES.include?(candidate) ? candidate.to_sym : :username
+    end
+
+    def shape
+      candidate = SiteSetting.facehash_avatars_shape.to_s.strip
+      ALLOWED_SHAPES.include?(candidate) ? candidate.to_sym : :round
+    end
+
+    def intensity_3d
+      candidate = SiteSetting.facehash_avatars_intensity_3d.to_s.strip
+      ALLOWED_INTENSITY_3D.include?(candidate) ? candidate.to_sym : :dramatic
     end
   end
 end
