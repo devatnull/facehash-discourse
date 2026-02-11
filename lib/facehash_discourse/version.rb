@@ -2,5 +2,5 @@
 
 module ::FacehashDiscourse
   PLUGIN_NAME = "discourse-facehash-avatars"
-  PLUGIN_VERSION = "0.3.4"
+  PLUGIN_VERSION = "0.4.0"
 end

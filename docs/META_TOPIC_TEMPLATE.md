@@ -61,6 +61,8 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 - `facehash_avatars_enabled`
 - `facehash_avatars_gradient_overlay`
 - `facehash_avatars_show_initial`
+- `facehash_avatars_inline_render`
+- `facehash_avatars_hover_effect`
 - `facehash_avatars_enable_blink`
 - `facehash_avatars_blink_interval_seconds`
 - `facehash_avatars_blink_duration_ms`

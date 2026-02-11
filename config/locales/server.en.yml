@@ -3,6 +3,8 @@ en:
     facehash_avatars_enabled: "Enable Facehash avatars as the default avatar for users without an uploaded profile picture"
     facehash_avatars_gradient_overlay: "Use Facehash gradient background style (disable for solid backgrounds)"
     facehash_avatars_show_initial: "Render user initial on top of Facehash avatars"
+    facehash_avatars_inline_render: "Render Facehash avatars inline in the browser so SVG animation/interaction can run reliably"
+    facehash_avatars_hover_effect: "Enable subtle hover motion for inline-rendered Facehash avatars"
     facehash_avatars_enable_blink: "Animate a subtle deterministic blink effect on the face marks"
     facehash_avatars_blink_interval_seconds: "Blink animation loop interval in seconds (recommended 3 to 12)"
     facehash_avatars_blink_duration_ms: "Blink closing/opening duration in milliseconds (recommended 80 to 400)"

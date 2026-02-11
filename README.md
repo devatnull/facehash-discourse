@@ -67,6 +67,8 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_enabled` | `true` | Enable Facehash avatars for default avatar fallback. |
 | `facehash_avatars_gradient_overlay` | `true` | Use gradient style (off = solid style). |
 | `facehash_avatars_show_initial` | `true` | Show initial character on avatar. |
+| `facehash_avatars_inline_render` | `true` | Inline render Facehash SVG in browser for reliable animation/interactions. |
+| `facehash_avatars_hover_effect` | `true` | Enable subtle hover interaction on inline-rendered avatars. |
 | `facehash_avatars_enable_blink` | `false` | Enable deterministic blink animation on face marks. |
 | `facehash_avatars_blink_interval_seconds` | `8` | Blink loop interval in seconds (clamped to 2..30). |
 | `facehash_avatars_blink_duration_ms` | `140` | Blink close/open duration in milliseconds (clamped to 80..2000). |
@@ -119,7 +121,7 @@ Docker Compose note:
 - Does not modify uploaded user profile pictures.
 - Avatars stay deterministic by design (same seed always returns the same avatar).
 - `facehash_avatars_palette` is a deterministic color pool. Each user maps to a stable color from that pool.
-- Since Discourse avatar slots are image URLs, React-only interaction props (for example hover `interactive`) are not applicable to this plugin endpoint.
+- Client-side inline render mode is enabled by default so hover/blink interactions can run in the browser on Facehash fallback avatars.
 
 ## Testing
 

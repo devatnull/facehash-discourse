@@ -8,6 +8,12 @@ plugins:
   facehash_avatars_show_initial:
     default: true
     client: false
+  facehash_avatars_inline_render:
+    default: true
+    client: true
+  facehash_avatars_hover_effect:
+    default: true
+    client: true
   facehash_avatars_enable_blink:
     default: false
     client: false
