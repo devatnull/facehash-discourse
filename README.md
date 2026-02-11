@@ -68,15 +68,15 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_gradient_overlay` | `true` | Use gradient style (off = solid style). |
 | `facehash_avatars_show_initial` | `true` | Show initial character on avatar. |
 | `facehash_avatars_enable_blink` | `false` | Enable deterministic blink animation on face marks. |
-| `facehash_avatars_blink_interval_seconds` | `6` | Blink loop interval in seconds (clamped to 2..30). |
-| `facehash_avatars_blink_duration_ms` | `180` | Blink close/open duration in milliseconds (clamped to 80..2000). |
+| `facehash_avatars_blink_interval_seconds` | `8` | Blink loop interval in seconds (clamped to 2..30). |
+| `facehash_avatars_blink_duration_ms` | `140` | Blink close/open duration in milliseconds (clamped to 80..2000). |
 | `facehash_avatars_shape` | `round` | Avatar mask shape: `round`, `squircle`, or `square`. |
-| `facehash_avatars_font_family` | `monospace` | Initial text `font-family` used in SVG output. |
-| `facehash_avatars_font_weight` | `700` | Initial text `font-weight` (`100`..`900` or `normal/bold`). |
+| `facehash_avatars_font_family` | `Inter, system-ui, sans-serif` | Initial text `font-family` used in SVG output. |
+| `facehash_avatars_font_weight` | `600` | Initial text `font-weight` (`100`..`900` or `normal/bold`). |
 | `facehash_avatars_auto_foreground_contrast` | `true` | Auto-select black/white foreground for legibility. |
-| `facehash_avatars_foreground_color` | `#000000` | Manual foreground color when auto contrast is disabled. |
+| `facehash_avatars_foreground_color` | `#111827` | Manual foreground color when auto contrast is disabled. |
 | `facehash_avatars_hash_source` | `username` | Seed source: `username`, `name`, `name_or_username`. |
-| `facehash_avatars_palette` | `#ec4899|#f59e0b|#3b82f6|#f97316|#10b981` | Color palette (pipe/comma/space/newline separated hex values). |
+| `facehash_avatars_palette` | `#264653|#2a9d8f|#e9c46a|#f4a261|#e76f51|#457b9d|#8ecae6|#ffb703` | Color palette (pipe/comma/space/newline separated hex values). |
 
 ## Behavior
 

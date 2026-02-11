@@ -13,31 +13,31 @@ plugins:
     client: false
   facehash_avatars_blink_interval_seconds:
     type: integer
-    default: 6
+    default: 8
     client: false
   facehash_avatars_blink_duration_ms:
     type: integer
-    default: 180
+    default: 140
     client: false
   facehash_avatars_shape:
     default: "round"
     client: false
   facehash_avatars_font_family:
-    default: "monospace"
+    default: "Inter, system-ui, sans-serif"
     client: false
   facehash_avatars_font_weight:
-    default: "700"
+    default: "600"
     client: false
   facehash_avatars_auto_foreground_contrast:
     default: true
     client: false
   facehash_avatars_foreground_color:
-    default: "#000000"
+    default: "#111827"
     client: false
   facehash_avatars_hash_source:
     default: "username"
     client: false
   facehash_avatars_palette:
     type: list
-    default: "#ec4899|#f59e0b|#3b82f6|#f97316|#10b981"
+    default: "#264653|#2a9d8f|#e9c46a|#f4a261|#e76f51|#457b9d|#8ecae6|#ffb703"
     client: false
