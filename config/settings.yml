@@ -14,6 +14,9 @@ plugins:
   facehash_avatars_hover_effect:
     default: true
     client: true
+  facehash_avatars_force_non_center_interactive_tilt:
+    default: true
+    client: true
   facehash_avatars_enable_blink:
     default: false
     client: false

@@ -69,6 +69,7 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_show_initial` | `true` | Show initial character on avatar. |
 | `facehash_avatars_inline_render` | `true` | Inline render Facehash SVG in browser for reliable animation/interactions. |
 | `facehash_avatars_hover_effect` | `true` | Enable subtle hover interaction on inline-rendered avatars. |
+| `facehash_avatars_force_non_center_interactive_tilt` | `true` | If the deterministic pose is center (`0,0`), use a deterministic non-center interactive tilt so hover feedback remains visible. |
 | `facehash_avatars_enable_blink` | `false` | Enable deterministic blink animation on face marks. |
 | `facehash_avatars_blink_interval_seconds` | `8` | Blink loop interval in seconds (clamped to 2..30). |
 | `facehash_avatars_blink_duration_ms` | `140` | Blink close/open duration in milliseconds (clamped to 80..2000). |

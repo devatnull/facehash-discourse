@@ -47,6 +47,10 @@
     return readBoolSetting("facehash_avatars_hover_effect", true);
   }
 
+  function forceNonCenterInteractiveTiltEnabled() {
+    return readBoolSetting("facehash_avatars_force_non_center_interactive_tilt", true);
+  }
+
   function isFacehashAvatarImage(img) {
     if (!(img instanceof HTMLImageElement)) {
       return false;
@@ -195,7 +199,13 @@
 
     // When the deterministic slot is dead-center, hover can look inert.
     // Use a deterministic non-center interactive tilt for motion feedback.
-    if (position && position.x === 0 && position.y === 0 && seed) {
+    if (
+      forceNonCenterInteractiveTiltEnabled() &&
+      position &&
+      position.x === 0 &&
+      position.y === 0 &&
+      seed
+    ) {
       position = pickNonCenterPosition(stringHash(seed));
     }
 
