@@ -1,0 +1,17 @@
+plugins:
+  facehash_avatars_enabled:
+    default: true
+    client: false
+  facehash_avatars_gradient_overlay:
+    default: true
+    client: false
+  facehash_avatars_show_initial:
+    default: true
+    client: false
+  facehash_avatars_hash_source:
+    default: "username"
+    client: false
+  facehash_avatars_palette:
+    type: list
+    default: "#ec4899|#f59e0b|#3b82f6|#f97316|#10b981"
+    client: false
