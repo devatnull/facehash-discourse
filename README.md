@@ -138,6 +138,12 @@ Run inside a Discourse checkout:
 bundle exec rspec plugins/discourse-facehash-avatars/spec
 ```
 
+Run plugin acceptance test suite:
+
+```bash
+rake plugin:qunit['discourse-facehash-avatars']
+```
+
 ## Meta Topic
 
 Use this template to publish your official Meta topic:

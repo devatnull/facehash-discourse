@@ -13,6 +13,8 @@
 
 - [ ] Run plugin specs in a clean Discourse environment:
   - `bundle exec rspec plugins/discourse-facehash-avatars/spec`
+- [ ] Run plugin acceptance tests in a clean Discourse environment:
+  - `rake plugin:qunit['discourse-facehash-avatars']`
 - [x] Verify avatars in staging:
   - topic list
   - post stream

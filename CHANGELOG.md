@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.8] - 2026-02-11
+
+### Added
+
+- Rails engine/autoloading structure:
+  - `lib/facehash_discourse/engine.rb`
+  - root `::FacehashDiscourse::PLUGIN_NAME` declaration in `plugin.rb`
+- Plugin acceptance test scaffold:
+  - `test/javascripts/acceptance/facehash-inline-avatar-runtime-test.js`
+
+### Changed
+
+- Removed explicit `require_relative` loading of plugin Ruby classes now covered by autoloading.
+- Expanded README testing section with plugin QUnit command.
+
 ## [0.5.7] - 2026-02-11
 
 ### Added
@@ -34,4 +49,3 @@ All notable changes to this project are documented in this file.
 ### Changed
 
 - Updated inline avatar runtime and interaction behavior.
-
