@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.13] - 2026-02-11
+
+### Fixed
+
+- Preserved original avatar border radius on inline wrapper elements.
+- Prevents square focus/active border rings around round Facehash avatars in topic list/poster preview cells.
+
 ## [0.5.12] - 2026-02-11
 
 ### Fixed

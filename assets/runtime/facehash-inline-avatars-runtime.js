@@ -270,6 +270,10 @@
     wrapper.className = (img.className || "") + " facehash-inline-avatar";
     wrapper.style.width = size.width + "px";
     wrapper.style.height = size.height + "px";
+    var imgComputedStyle = window.getComputedStyle(img);
+    if (imgComputedStyle && imgComputedStyle.borderRadius) {
+      wrapper.style.borderRadius = imgComputedStyle.borderRadius;
+    }
     wrapper.setAttribute("aria-hidden", "true");
 
     svg.classList.add("facehash-inline-svg");
