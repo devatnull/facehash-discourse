@@ -148,6 +148,16 @@
     var hash = stringHash(seed);
     var position =
       INTERACTIVE_SPHERE_POSITIONS[hash % INTERACTIVE_SPHERE_POSITIONS.length] || { x: 0, y: 0 };
+    if (position.x === 0 && position.y === 0) {
+      for (var i = 0; i < INTERACTIVE_SPHERE_POSITIONS.length; i += 1) {
+        var idx = (hash + 3 + i) % INTERACTIVE_SPHERE_POSITIONS.length;
+        var candidate = INTERACTIVE_SPHERE_POSITIONS[idx];
+        if (candidate && (candidate.x !== 0 || candidate.y !== 0)) {
+          position = candidate;
+          break;
+        }
+      }
+    }
 
     wrapper.style.setProperty("--fh-rx", position.x * INTERACTIVE_ROTATE_RANGE + "deg");
     wrapper.style.setProperty("--fh-ry", position.y * INTERACTIVE_ROTATE_RANGE + "deg");
