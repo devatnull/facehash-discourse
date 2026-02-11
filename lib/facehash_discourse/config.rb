@@ -76,7 +76,7 @@ module ::FacehashDiscourse
     end
 
     def intensity_3d
-      :dramatic
+      :none
     end
 
     def blink_interval_seconds

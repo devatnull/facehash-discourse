@@ -29,7 +29,7 @@ describe FacehashDiscourse::AvatarRenderer do
   it "renders a visible background gradient when variant is gradient" do
     renderer = described_class.new(name: "alice", size: 64, variant: :gradient, show_initial: true, colors: colors)
 
-    expect(renderer.to_svg).to include("linearGradient")
+    expect(renderer.to_svg).to include("radialGradient")
     expect(renderer.to_svg).to include("facehash-gradient-")
   end
 

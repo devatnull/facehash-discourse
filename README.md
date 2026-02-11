@@ -119,6 +119,7 @@ Docker Compose note:
 - Does not modify uploaded user profile pictures.
 - Avatars stay deterministic by design (same seed always returns the same avatar).
 - `facehash_avatars_palette` is a deterministic color pool. Each user maps to a stable color from that pool.
+- Since Discourse avatar slots are image URLs, React-only interaction props (for example hover `interactive`) are not applicable to this plugin endpoint.
 
 ## Testing
 
