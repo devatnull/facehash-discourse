@@ -8,15 +8,11 @@
 
 .facehash-inline-host {
   position: relative;
-  line-height: 0;
 }
 
 .facehash-inline-overlay {
   pointer-events: none;
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
 }
 
 td.posters .facehash-inline-avatar,
@@ -54,14 +50,16 @@ img.facehash-inline-hidden-safe {
     translateY(var(--fh-ty, 0px));
 }
 
-.facehash-inline-host:hover > .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face {
+img.facehash-inline-hidden-safe:hover + .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face,
+a:hover > img.facehash-inline-hidden-safe + .facehash-inline-avatar.facehash-inline-hover .facehash-inline-interactive-face {
   transform:
     rotateX(0deg)
     rotateY(0deg)
     translateZ(var(--fh-tz, 0px));
 }
 
-.facehash-inline-host:hover > .facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face {
+img.facehash-inline-hidden-safe:hover + .facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face,
+a:hover > img.facehash-inline-hidden-safe + .facehash-inline-avatar.facehash-inline-hover.facehash-inline-small .facehash-inline-interactive-face {
   transform:
     translateX(0px)
     translateY(0px);

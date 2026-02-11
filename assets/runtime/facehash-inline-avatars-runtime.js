@@ -319,14 +319,29 @@
     host.classList.add(HOST_CLASS);
   }
 
+  function imageGeometryInHost(img, size) {
+    var width = img.offsetWidth || (size && size.width) || 0;
+    var height = img.offsetHeight || (size && size.height) || 0;
+    var left = img.offsetLeft || 0;
+    var top = img.offsetTop || 0;
+
+    return {
+      width: width,
+      height: height,
+      left: left,
+      top: top,
+    };
+  }
+
   function buildOverlay(img, svg, withHover, size) {
+    var geometry = imageGeometryInHost(img, size);
     var wrapper = document.createElement("span");
     wrapper.className = "facehash-inline-avatar " + OVERLAY_CLASS;
-    wrapper.style.width = "100%";
-    wrapper.style.height = "100%";
+    wrapper.style.width = geometry.width + "px";
+    wrapper.style.height = geometry.height + "px";
     wrapper.style.position = "absolute";
-    wrapper.style.top = "0";
-    wrapper.style.left = "0";
+    wrapper.style.top = geometry.top + "px";
+    wrapper.style.left = geometry.left + "px";
 
     var imgComputedStyle = window.getComputedStyle(img);
     if (imgComputedStyle && imgComputedStyle.borderRadius) {
@@ -398,7 +413,7 @@
         return;
       }
 
-      host.appendChild(wrapper);
+      img.insertAdjacentElement("afterend", wrapper);
       img.classList.add("facehash-inline-hidden-safe");
       img.setAttribute(SIGNATURE_ATTR, signatureForImage(img));
       img.setAttribute(PROCESSED_ATTR, "done");
@@ -514,6 +529,16 @@
         attributeFilter: ["src", "srcset", "width", "height"],
       });
     }
+
+    var resizeTimer = null;
+    window.addEventListener("resize", function () {
+      if (resizeTimer) {
+        window.clearTimeout(resizeTimer);
+      }
+      resizeTimer = window.setTimeout(function () {
+        scheduleScan(document, withHover);
+      }, 80);
+    });
   }
 
   if (document.readyState === "loading") {

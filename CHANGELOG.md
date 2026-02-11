@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.19] - 2026-02-11
+
+### Fixed
+
+- Fixed tiny-avatar regression in non-header contexts by anchoring overlays to the actual image box (`offsetLeft/offsetTop/offsetWidth/offsetHeight`) instead of parent container bounds.
+- Restored hover trigger compatibility with image-adjacent overlay structure.
+- Added resize resync so overlay geometry stays aligned after layout changes.
+
 ## [0.5.18] - 2026-02-11
 
 ### Fixed
