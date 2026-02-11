@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.11] - 2026-02-11
+
+### Fixed
+
+- Disabled `perspective` on tiny inline avatars (<= 28px) to avoid residual square 3D plane artifacts in Safari/WebKit preview contexts.
+
 ## [0.5.10] - 2026-02-11
 
 ### Fixed

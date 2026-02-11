@@ -235,7 +235,7 @@
     target.style.setProperty("--fh-rx", position.x * rotateRange + "deg");
     target.style.setProperty("--fh-ry", position.y * rotateRange + "deg");
     target.style.setProperty("--fh-tz", translateZ + "px");
-    wrapper.style.perspective = INTERACTIVE_PERSPECTIVE + "px";
+    wrapper.style.perspective = isSmallAvatar ? "none" : INTERACTIVE_PERSPECTIVE + "px";
   }
 
   function parseSvg(text) {
