@@ -85,7 +85,9 @@ describe FacehashDiscourse::AvatarRenderer do
 
     svg = renderer.to_svg
     expect(svg).to include("@keyframes facehash-blink-")
-    expect(svg).to include("animation-duration:5s")
+    expect(svg).to include("animation-duration:")
+    expect(svg).not_to include("animation-duration:5s")
+    expect(svg).to include("animation-delay:-")
   end
 
   it "supports custom font family and weight" do

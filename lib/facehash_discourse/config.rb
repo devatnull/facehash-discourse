@@ -4,7 +4,8 @@ require "zlib"
 
 module ::FacehashDiscourse
   module Config
-    DEFAULT_COLORS = %w[#ec4899 #f59e0b #3b82f6 #f97316 #10b981].freeze
+    DEFAULT_COLORS =
+      %w[#0f766e #0ea5a4 #2563eb #4f46e5 #9333ea #be185d #ea580c #ca8a04 #15803d #334155].freeze
     COLOR_REGEX = /\A#[0-9A-Fa-f]{3,8}\z/
     ALLOWED_HASH_SOURCES = %w[username name name_or_username].freeze
     ALLOWED_SHAPES = %w[square squircle round].freeze

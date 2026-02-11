@@ -71,12 +71,12 @@ docker compose --env-file discourse/.env up -d --force-recreate discourse
 | `facehash_avatars_blink_interval_seconds` | `8` | Blink loop interval in seconds (clamped to 2..30). |
 | `facehash_avatars_blink_duration_ms` | `140` | Blink close/open duration in milliseconds (clamped to 80..2000). |
 | `facehash_avatars_shape` | `round` | Avatar mask shape: `round`, `squircle`, or `square`. |
-| `facehash_avatars_font_family` | `Inter, system-ui, sans-serif` | Initial text `font-family` used in SVG output. |
+| `facehash_avatars_font_family` | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif` | Initial text `font-family` used in SVG output. |
 | `facehash_avatars_font_weight` | `600` | Initial text `font-weight` (`100`..`900` or `normal/bold`). |
 | `facehash_avatars_auto_foreground_contrast` | `true` | Auto-select black/white foreground for legibility. |
 | `facehash_avatars_foreground_color` | `#111827` | Manual foreground color when auto contrast is disabled. |
 | `facehash_avatars_hash_source` | `username` | Seed source: `username`, `name`, `name_or_username`. |
-| `facehash_avatars_palette` | `#264653|#2a9d8f|#e9c46a|#f4a261|#e76f51|#457b9d|#8ecae6|#ffb703` | Color palette (pipe/comma/space/newline separated hex values). |
+| `facehash_avatars_palette` | `#0f766e|#0ea5a4|#2563eb|#4f46e5|#9333ea|#be185d|#ea580c|#ca8a04|#15803d|#334155` | Color palette (pipe/comma/space/newline separated hex values). |
 
 ## Behavior
 

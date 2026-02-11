@@ -72,8 +72,8 @@ module ::FacehashDiscourse
       shape: :round,
       intensity_3d: :dramatic,
       enable_blink: false,
-      blink_interval_seconds: 6,
-      blink_duration_ms: 180,
+      blink_interval_seconds: 8,
+      blink_duration_ms: 140,
       font_family: "monospace",
       font_weight: "700",
       foreground_color: "#000000",
@@ -136,8 +136,10 @@ module ::FacehashDiscourse
       shade_opacity = intensity_stops[:shade]
       face_shadow_opacity = intensity_stops[:shadow]
 
+      blink_interval = blink_interval_seconds_for_avatar
+
       svg = +%(<svg xmlns="http://www.w3.org/2000/svg" width="#{@size}" height="#{@size}" viewBox="0 0 #{@size} #{@size}" role="img" aria-label="Facehash avatar">)
-      svg << blink_style_markup(blink_animation_id) if @enable_blink
+      svg << blink_style_markup(blink_animation_id, blink_interval) if @enable_blink
 
       if @variant == :gradient
         defs << <<~GRADIENT.strip
@@ -197,7 +199,7 @@ module ::FacehashDiscourse
 
       shadow_attr = face_shadow_opacity.positive? ? %Q( filter="url(##{shadow_id})") : ""
       if @enable_blink
-        svg << %(<g class="#{blink_animation_id}" style="animation-duration:#{format_float(@blink_interval_seconds)}s;animation-delay:-#{format_float(blink_delay_seconds)}s;">)
+        svg << %(<g class="#{blink_animation_id}" style="animation-duration:#{format_float(blink_interval)}s;animation-delay:-#{format_float(blink_delay_seconds(blink_interval))}s;">)
       end
       svg << %(<svg x="#{format_float(face_x)}" y="#{format_float(face_y)}" width="#{format_float(face_width)}" height="#{format_float(face_height)}" viewBox="#{face_data[:view_box]}" fill="none" aria-hidden="true"#{shadow_attr}>)
       svg << path_markup
@@ -347,8 +349,8 @@ module ::FacehashDiscourse
       format("#%02x%02x%02x", rgb[0], rgb[1], rgb[2])
     end
 
-    def blink_style_markup(blink_animation_id)
-      close_ratio = [@blink_duration_ms.to_f / (@blink_interval_seconds * 1000.0), 0.18].min
+    def blink_style_markup(blink_animation_id, interval_seconds)
+      close_ratio = [@blink_duration_ms.to_f / (interval_seconds * 1000.0), 0.18].min
       close_start = [0.48 - (close_ratio / 2.0), 0.35].max
       close_end = [close_start + close_ratio, 0.62].min
 
@@ -370,10 +372,26 @@ module ::FacehashDiscourse
       STYLE
     end
 
-    def blink_delay_seconds
-      return 0.0 if @blink_interval_seconds <= 0
+    def blink_interval_seconds_for_avatar
+      base = @blink_interval_seconds.to_f
+      return base if base <= 0
 
-      (string_hash(@name) % 1000) / 1000.0 * @blink_interval_seconds
+      # Deterministic per-avatar jitter prevents lockstep blinking across lists.
+      jitter_source = ((blink_hash >> 8) % 1000) / 1000.0
+      jitter_factor = 0.8 + (jitter_source * 0.4)
+      interval = base * jitter_factor
+      interval.clamp(MIN_BLINK_INTERVAL_SECONDS, MAX_BLINK_INTERVAL_SECONDS).to_f
+    end
+
+    def blink_delay_seconds(interval_seconds)
+      return 0.0 if interval_seconds <= 0
+
+      phase = (blink_hash % 10_000) / 10_000.0
+      phase * interval_seconds
+    end
+
+    def blink_hash
+      @blink_hash ||= string_hash("#{@name}|blink")
     end
 
     def percent(value)

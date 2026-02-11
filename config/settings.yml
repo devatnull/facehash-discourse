@@ -23,7 +23,7 @@ plugins:
     default: "round"
     client: false
   facehash_avatars_font_family:
-    default: "Inter, system-ui, sans-serif"
+    default: "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif"
     client: false
   facehash_avatars_font_weight:
     default: "600"
@@ -39,5 +39,5 @@ plugins:
     client: false
   facehash_avatars_palette:
     type: list
-    default: "#264653|#2a9d8f|#e9c46a|#f4a261|#e76f51|#457b9d|#8ecae6|#ffb703"
+    default: "#0f766e|#0ea5a4|#2563eb|#4f46e5|#9333ea|#be185d|#ea580c|#ca8a04|#15803d|#334155"
     client: false

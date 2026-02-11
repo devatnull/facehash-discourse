@@ -71,7 +71,8 @@ describe FacehashDiscourse::AvatarsController do
 
     expect(response.status).to eq(200)
     expect(response.body).to include("@keyframes facehash-blink-")
-    expect(response.body).to include("animation-duration:5s")
+    expect(response.body).to include("animation-duration:")
+    expect(response.body).to include("animation-delay:-")
   end
 
   it "uses custom manual foreground color when auto contrast is disabled" do
