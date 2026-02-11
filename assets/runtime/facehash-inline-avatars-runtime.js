@@ -9,6 +9,7 @@
   var PROCESSED_ATTR = "data-facehash-inline-state";
   var TOKEN_ATTR = "data-facehash-inline-token";
   var SIGNATURE_ATTR = "data-facehash-inline-signature";
+  var HOST_CLASS = "facehash-inline-host";
   var OVERLAY_CLASS = "facehash-inline-overlay";
   var OVERLAY_FOR_ATTR = "data-facehash-inline-for";
   var SVG_CACHE = new Map();
@@ -306,16 +307,24 @@
     if (existingOverlay && existingOverlay.parentElement) {
       existingOverlay.parentElement.removeChild(existingOverlay);
     }
+  }
 
-    img.classList.remove("facehash-inline-hidden-safe");
+  function ensureHostLayout(host) {
+    if (!(host instanceof Element)) {
+      return;
+    }
+
+    host.classList.add(HOST_CLASS);
   }
 
   function buildOverlay(img, svg, withHover, size) {
     var wrapper = document.createElement("span");
-    wrapper.className = (img.className || "") + " facehash-inline-avatar " + OVERLAY_CLASS;
-    wrapper.style.width = size.width + "px";
-    wrapper.style.height = size.height + "px";
-    wrapper.style.marginLeft = -size.width + "px";
+    wrapper.className = "facehash-inline-avatar " + OVERLAY_CLASS;
+    wrapper.style.width = "100%";
+    wrapper.style.height = "100%";
+    wrapper.style.position = "absolute";
+    wrapper.style.top = "0";
+    wrapper.style.left = "0";
 
     var imgComputedStyle = window.getComputedStyle(img);
     if (imgComputedStyle && imgComputedStyle.borderRadius) {
@@ -339,6 +348,8 @@
     if (!isFacehashAvatarImage(img) || !img.parentElement) {
       return;
     }
+    var host = img.parentElement;
+    ensureHostLayout(host);
 
     var signature = signatureForImage(img);
     if (img.getAttribute(PROCESSED_ATTR) === "done" && img.getAttribute(SIGNATURE_ATTR) === signature) {
@@ -380,8 +391,12 @@
       var token = ensureToken(img);
       wrapper.setAttribute(OVERLAY_FOR_ATTR, token);
 
-      img.classList.add("facehash-inline-hidden-safe");
-      img.insertAdjacentElement("afterend", wrapper);
+      if (!host || !host.isConnected) {
+        img.setAttribute(PROCESSED_ATTR, "failed");
+        return;
+      }
+
+      host.appendChild(wrapper);
       img.setAttribute(SIGNATURE_ATTR, signatureForImage(img));
       img.setAttribute(PROCESSED_ATTR, "done");
     });

@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.17] - 2026-02-11
+
+### Fixed
+
+- Fixed inline overlay placement so Facehash avatars stay aligned in all contexts (post stream left column, topic lists, header/user menu) without horizontal overflow.
+- Switched overlay mounting from sibling negative-margin strategy to host-anchored absolute overlay strategy.
+- Restored hover interaction trigger by binding hover to the avatar host container.
+
 ## [0.5.16] - 2026-02-11
 
 ### Fixed
