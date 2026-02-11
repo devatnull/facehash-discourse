@@ -1,21 +1,17 @@
 # discourse-facehash-avatars
 
-A production-oriented Discourse plugin that replaces default avatars with deterministic Facehash-style avatars.
+Deterministic Facehash avatars for Discourse default avatar slots.
 
-Users with uploaded profile pictures are not affected.
+This plugin replaces Discourse default avatars for users without an uploaded profile picture. Users with uploaded avatars are unchanged.
 
-## What it does
+## Installation
 
-- Replaces core default letter avatars with deterministic Facehash avatars.
-- Keeps uploaded avatars unchanged.
-- Serves generated avatars from a local Discourse route as `image/svg+xml`.
-- Uses immutable CDN-friendly caching (`1 year`) with settings-based versioning.
-- Supports `ETag`/`304 Not Modified` conditional requests for browser/proxy efficiency.
-- Supports configurable palette, initial visibility, and gradient vs solid mode.
+Follow the official Discourse plugin installation guide:
+- https://meta.discourse.org/t/install-a-plugin/19157
 
-## Install
+### Docker Launcher (`app.yml`)
 
-Add this plugin repo to your Discourse `app.yml`:
+Add the plugin clone command under `hooks -> after_code`:
 
 ```yml
 hooks:
@@ -23,48 +19,90 @@ hooks:
     - exec:
         cd: $home/plugins
         cmd:
-          - git clone https://github.com/devatnull/facehash-discourse.git
+          - git clone https://github.com/devatnull/facehash-discourse.git discourse-facehash-avatars
 ```
 
 Then rebuild:
 
 ```bash
+cd /var/discourse
 ./launcher rebuild app
 ```
 
-## Settings
+### Docker Compose (custom deployments)
 
-- `facehash_avatars_enabled` (default: `true`)
-- `facehash_avatars_gradient_overlay` (default: `true`)
-- `facehash_avatars_show_initial` (default: `true`)
-- `facehash_avatars_hash_source` (default: `username`)  
-  Allowed values: `username`, `name`, `name_or_username`
-- `facehash_avatars_palette` (default: `#ec4899|#f59e0b|#3b82f6|#f97316|#10b981`)
-
-Palette accepts pipe, comma, whitespace, or newline separators.
-
-## Avatar URL shape
-
-When enabled, users without uploaded avatars resolve to:
-
-```text
-/facehash_avatar/:username/{size}/:version.svg
-```
-
-`version` changes when plugin display settings change, allowing safe cache busting.
-
-## Test
-
-Run plugin specs inside your Discourse dev/test environment:
+1. Clone the plugin on the host:
 
 ```bash
-bundle exec rspec plugins/facehash-discourse/spec
+mkdir -p plugins
+git clone https://github.com/devatnull/facehash-discourse.git plugins/discourse-facehash-avatars
 ```
 
-## Notes
+2. Mount it into the Discourse container:
 
-- This plugin intentionally overrides `User.default_template` so all default avatar fallbacks use Facehash.
-- If the plugin is disabled, core avatar behavior resumes.
-- When `facehash_avatars_hash_source` is set to `name`/`name_or_username`, the avatar seed is derived from `User#name` when available.
-- Name-based seed lookups are cached and invalidated when a user is updated.
-- Username parsing/validation follows Discourse's `UsernameValidator`, so valid forum usernames are supported while unsafe/invalid path input is rejected.
+```yml
+services:
+  discourse:
+    volumes:
+      - ${DISCOURSE_DATA_PATH}:/shared
+      - ./plugins/discourse-facehash-avatars:/var/www/discourse/plugins/discourse-facehash-avatars
+```
+
+3. Recreate the Discourse service:
+
+```bash
+docker compose --env-file discourse/.env up -d --force-recreate discourse
+```
+
+## How To Use
+
+1. Go to `Admin -> Settings`.
+2. Search for `facehash_avatars`.
+3. Configure settings below.
+
+## Settings
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `facehash_avatars_enabled` | `true` | Enable Facehash avatars for default avatar fallback. |
+| `facehash_avatars_gradient_overlay` | `true` | Use gradient style (off = solid style). |
+| `facehash_avatars_show_initial` | `true` | Show initial character on avatar. |
+| `facehash_avatars_hash_source` | `username` | Seed source: `username`, `name`, `name_or_username`. |
+| `facehash_avatars_palette` | `#ec4899|#f59e0b|#3b82f6|#f97316|#10b981` | Color palette (pipe/comma/space/newline separated hex values). |
+
+## Behavior
+
+- Route shape: `/facehash_avatar/:username/{size}/:version.svg`
+- Response type: `image/svg+xml`
+- Cache: `immutable` 1-year cache with `ETag` support
+- Uploaded avatars: unchanged
+
+## Security And Validation
+
+- Username parsing/validation is aligned with Discourse `UsernameValidator`.
+- Invalid username payloads fall back safely to the core blank avatar image.
+- Name-based hash source lookups are cached and invalidated on user updates.
+
+## Compatibility Notes
+
+- Compatible with valid Discourse usernames (including dotted usernames).
+- For stable plugin identity, mount/clone into `discourse-facehash-avatars` directory.
+
+## Testing
+
+Run inside a Discourse checkout:
+
+```bash
+bundle exec rspec plugins/discourse-facehash-avatars/spec
+```
+
+## Meta Topic
+
+Use this template to publish your official Meta topic:
+- `docs/META_TOPIC_TEMPLATE.md`
+
+After posting, add the Meta topic link here.
+
+## License
+
+MIT
