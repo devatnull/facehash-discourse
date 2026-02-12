@@ -15,6 +15,16 @@ All notable changes to this project are documented in this file.
 - Avatar SVG output now includes `@font-face` mapping for bundled Geist Pixel when rendering initials, so the pixel font is available consistently across devices without requiring local font installation.
 - Default `facehash_avatars_font_family` now prefers bundled Geist Pixel with monospace fallbacks.
 
+## [0.5.21] - 2026-02-12
+
+### Fixed
+
+- Fixed `facehash_avatars_palette` parsing for list settings so uppercase hex values (and list storage formats) do not incorrectly fall back to defaults.
+
+### Changed
+
+- Updated default `facehash_avatars_palette` to a broader 16-color saturated palette.
+
 ## [0.5.19] - 2026-02-11
 
 ### Fixed

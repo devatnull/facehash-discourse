@@ -4,15 +4,21 @@ require "rails_helper"
 
 describe FacehashDiscourse::Config do
   it "parses configured palette and filters invalid colors" do
-    SiteSetting.facehash_avatars_palette = "#112233|invalid|#abcdef"
+    allow(SiteSetting).to receive(:facehash_avatars_palette).and_return(["#112233", "invalid", "#ABCDEF"])
 
     expect(described_class.colors).to eq(%w[#112233 #abcdef])
   end
 
   it "falls back to defaults when palette is invalid" do
-    SiteSetting.facehash_avatars_palette = "invalid"
+    allow(SiteSetting).to receive(:facehash_avatars_palette).and_return(["invalid"])
 
     expect(described_class.colors).to eq(described_class::DEFAULT_COLORS)
+  end
+
+  it "accepts uppercase hex values in list settings" do
+    allow(SiteSetting).to receive(:facehash_avatars_palette).and_return(["#FF5555", "#FF79C6"])
+
+    expect(described_class.colors).to eq(%w[#ff5555 #ff79c6])
   end
 
   it "supports a valid hash source setting" do
@@ -77,7 +83,7 @@ describe FacehashDiscourse::Config do
 
   it "deduplicates and caps palette colors for safety" do
     color_list = (1..50).map { |i| format("#%06x", i) }
-    SiteSetting.facehash_avatars_palette = ([color_list.first] + color_list).join("|")
+    allow(SiteSetting).to receive(:facehash_avatars_palette).and_return([color_list.first] + color_list)
 
     parsed = described_class.colors
 

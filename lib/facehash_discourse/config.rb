@@ -10,7 +10,24 @@ module ::FacehashDiscourse
     BUNDLED_GEIST_PIXEL_FONT_PATH =
       File.expand_path("../../assets/fonts/#{BUNDLED_GEIST_PIXEL_FONT_FILENAME}", __dir__)
     DEFAULT_COLORS =
-      %w[#0f766e #0ea5a4 #2563eb #4f46e5 #9333ea #be185d #ea580c #ca8a04 #15803d #334155].freeze
+      %w[
+        #ff5555
+        #ff79c6
+        #bd93f9
+        #644ac9
+        #6272a4
+        #e06b4a
+        #d4813f
+        #c49b2a
+        #4aad5b
+        #2a9d8f
+        #3a8fd4
+        #e05a8a
+        #9b6ed0
+        #5b8c6e
+        #c75a8a
+        #4a90a4
+      ].freeze
     COLOR_REGEX = /\A#[0-9A-Fa-f]{3,8}\z/
     ALLOWED_HASH_SOURCES = %w[username name name_or_username].freeze
     ALLOWED_SHAPES = %w[square squircle round].freeze
@@ -46,11 +63,19 @@ module ::FacehashDiscourse
     end
 
     def colors
+      raw = SiteSetting.facehash_avatars_palette
+      candidates =
+        if raw.is_a?(Array)
+          raw
+        else
+          raw.to_s.split(/[\n,|\s]+/)
+        end
+
       parsed =
-        SiteSetting.facehash_avatars_palette
-          .to_s
-          .split(/[\n,|\s]+/)
-          .map(&:strip)
+        candidates
+          .map { |color| color.to_s.strip.gsub(/\A["']+|["']+\z/, "") }
+          .reject(&:empty?)
+          .map(&:downcase)
           .select { |color| COLOR_REGEX.match?(color) }
           .uniq
           .first(MAX_COLORS)

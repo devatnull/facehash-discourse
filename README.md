@@ -154,7 +154,7 @@ Not currently exposed (by design in this plugin):
 | `facehash_avatars_auto_foreground_contrast` | `true` | Auto-select black/white foreground for legibility. |
 | `facehash_avatars_foreground_color` | `#111827` | Manual foreground color when auto contrast is disabled. |
 | `facehash_avatars_hash_source` | `username` | Seed source: `username`, `name`, `name_or_username`. |
-| `facehash_avatars_palette` | `#0f766e|#0ea5a4|#2563eb|#4f46e5|#9333ea|#be185d|#ea580c|#ca8a04|#15803d|#334155` | Color palette (pipe/comma/space/newline separated hex values). |
+| `facehash_avatars_palette` | `#ff5555|#ff79c6|#bd93f9|#644ac9|#6272a4|#e06b4a|#d4813f|#c49b2a|#4aad5b|#2a9d8f|#3a8fd4|#e05a8a|#9b6ed0|#5b8c6e|#c75a8a|#4a90a4` | Color palette (pipe/comma/space/newline separated hex values). |
 
 ## Behavior
 
